@@ -7,17 +7,21 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Play, Square, Plus, Check, X } from 'lucide-react';
+import { Play, Square, Plus, Check, X, Trash2, Timer } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 export const WorkoutLogger = () => {
   const {
     currentWorkout,
     workoutHistory,
+    workoutTimer,
+    formatTime,
     startWorkout,
     addExercise,
     addSet,
     updateSet,
+    deleteSet,
+    deleteExercise,
     completeWorkout,
     cancelWorkout
   } = useWorkout();
@@ -105,10 +109,18 @@ export const WorkoutLogger = () => {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Square className="h-5 w-5" />
-              {currentWorkout.name}
-            </CardTitle>
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Square className="h-5 w-5" />
+                {currentWorkout.name}
+              </CardTitle>
+              <div className="flex items-center gap-2 mt-1">
+                <Timer className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">
+                  {formatTime(workoutTimer)}
+                </span>
+              </div>
+            </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={handleCancelWorkout}>
                 <X className="h-4 w-4 mr-1" />
@@ -143,7 +155,17 @@ export const WorkoutLogger = () => {
             currentWorkout.exercises.map(workoutExercise => (
               <Card key={workoutExercise.id}>
                 <CardHeader>
-                  <CardTitle className="text-lg">{workoutExercise.exercise.name}</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg">{workoutExercise.exercise.name}</CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteExercise(workoutExercise.id)}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {workoutExercise.sets.map((set, index) => (
@@ -170,15 +192,27 @@ export const WorkoutLogger = () => {
                           className="w-16"
                         />
                       </div>
-                      <Button
-                        variant={set.isCompleted ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => updateSet(workoutExercise.id, set.id, { 
-                          isCompleted: !set.isCompleted 
-                        })}
-                      >
-                        <Check className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button
+                          variant={set.isCompleted ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => updateSet(workoutExercise.id, set.id, { 
+                            isCompleted: !set.isCompleted 
+                          })}
+                        >
+                          <Check className="h-4 w-4" />
+                        </Button>
+                        {workoutExercise.sets.length > 1 && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => deleteSet(workoutExercise.id, set.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ))}
                   <Separator />
