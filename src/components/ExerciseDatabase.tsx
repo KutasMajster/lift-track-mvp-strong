@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ExerciseDetail } from './ExerciseDetail';
 import { Search, Plus } from 'lucide-react';
 
 interface ExerciseDatabaseProps {
@@ -15,6 +16,8 @@ interface ExerciseDatabaseProps {
 export const ExerciseDatabase = ({ onAddExercise, isInWorkout }: ExerciseDatabaseProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<ExerciseCategory | 'all'>('all');
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [showDetail, setShowDetail] = useState(false);
 
   const filteredExercises = EXERCISES.filter(exercise => {
     const matchesSearch = exercise.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -61,31 +64,49 @@ export const ExerciseDatabase = ({ onAddExercise, isInWorkout }: ExerciseDatabas
       <div className="grid gap-3">
         {filteredExercises.map(exercise => (
           <Card key={exercise.id} className="cursor-pointer hover:shadow-md transition-shadow">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">{exercise.name}</CardTitle>
-                {isInWorkout && (
-                  <Button 
-                    size="sm" 
-                    onClick={() => onAddExercise(exercise)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-              <CardDescription className="text-xs">
-                {exercise.equipment.join(', ')} • {exercise.muscleGroups.join(', ')}
-              </CardDescription>
-            </CardHeader>
-            {exercise.instructions && (
-              <CardContent className="pt-0">
-                <p className="text-sm text-muted-foreground">{exercise.instructions}</p>
-              </CardContent>
-            )}
+            <div 
+              onClick={() => {
+                setSelectedExercise(exercise);
+                setShowDetail(true);
+              }}
+            >
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">{exercise.name}</CardTitle>
+                  {isInWorkout && (
+                    <Button 
+                      size="sm" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAddExercise(exercise);
+                      }}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                <CardDescription className="text-xs">
+                  {exercise.equipment.join(', ')} • {exercise.muscleGroups.join(', ')}
+                </CardDescription>
+              </CardHeader>
+              {exercise.instructions && (
+                <CardContent className="pt-0">
+                  <p className="text-sm text-muted-foreground line-clamp-2">{exercise.instructions}</p>
+                </CardContent>
+              )}
+            </div>
           </Card>
         ))}
       </div>
+
+      <ExerciseDetail
+        exercise={selectedExercise}
+        isOpen={showDetail}
+        onClose={() => setShowDetail(false)}
+        onAddExercise={onAddExercise}
+        showAddButton={isInWorkout}
+      />
     </div>
   );
 };

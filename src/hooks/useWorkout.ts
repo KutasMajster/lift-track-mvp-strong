@@ -255,6 +255,14 @@ export const useWorkout = () => {
     setWorkoutTemplates(prev => prev.filter(t => t.id !== templateId));
   }, []);
 
+  const updateTemplate = useCallback((updatedTemplate: WorkoutTemplate) => {
+    setWorkoutTemplates(prev => 
+      prev.map(template => 
+        template.id === updatedTemplate.id ? updatedTemplate : template
+      )
+    );
+  }, []);
+
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -282,6 +290,7 @@ export const useWorkout = () => {
     completeWorkout,
     cancelWorkout,
     saveAsTemplate,
-    deleteTemplate
+    deleteTemplate,
+    updateTemplate
   };
 };

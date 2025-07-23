@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { History, Play, BookOpen, Trash2, Calendar, Timer, Weight, RotateCcw } from 'lucide-react';
+import { History, Play, BookOpen, Trash2, Calendar, Timer, Weight, RotateCcw, Edit, BarChart3 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Workout, WorkoutTemplate } from '@/types/exercise';
+import { UserStats } from './UserStats';
+import { TemplateEditor } from './TemplateEditor';
 
 export const WorkoutHistory = () => {
   const { 
@@ -16,10 +18,13 @@ export const WorkoutHistory = () => {
     startWorkout, 
     startWorkoutFromTemplate,
     saveAsTemplate,
-    deleteTemplate
+    deleteTemplate,
+    updateTemplate
   } = useWorkout();
   
   const [expandedWorkout, setExpandedWorkout] = useState<string | null>(null);
+  const [editingTemplate, setEditingTemplate] = useState<WorkoutTemplate | null>(null);
+  const [showTemplateEditor, setShowTemplateEditor] = useState(false);
 
   const handleSaveAsTemplate = (workout: Workout) => {
     const template = saveAsTemplate(workout);
@@ -42,6 +47,19 @@ export const WorkoutHistory = () => {
     toast({
       title: "Template Deleted",
       description: `"${template.name}" template has been deleted.`
+    });
+  };
+
+  const handleEditTemplate = (template: WorkoutTemplate) => {
+    setEditingTemplate(template);
+    setShowTemplateEditor(true);
+  };
+
+  const handleUpdateTemplate = (template: WorkoutTemplate) => {
+    updateTemplate(template);
+    toast({
+      title: "Template Updated",
+      description: `"${template.name}" has been updated.`
     });
   };
 
@@ -76,9 +94,10 @@ export const WorkoutHistory = () => {
       </div>
 
       <Tabs defaultValue="history" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="history">Workout History</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="history">History</TabsTrigger>
           <TabsTrigger value="templates">Templates</TabsTrigger>
+          <TabsTrigger value="stats">Stats</TabsTrigger>
         </TabsList>
 
         <TabsContent value="history" className="space-y-4">
@@ -226,7 +245,15 @@ export const WorkoutHistory = () => {
                           onClick={() => handleStartFromTemplate(template)}
                         >
                           <Play className="h-4 w-4 mr-1" />
-                          Start Workout
+                          Start
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditTemplate(template)}
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          Edit
                         </Button>
                         <Button
                           variant="ghost"
@@ -254,7 +281,30 @@ export const WorkoutHistory = () => {
             </div>
           )}
         </TabsContent>
+
+        <TabsContent value="stats" className="space-y-4">
+          <UserStats workoutHistory={workoutHistory} />
+        </TabsContent>
       </Tabs>
+
+      <TemplateEditor
+        template={editingTemplate}
+        isOpen={showTemplateEditor}
+        onClose={() => {
+          setShowTemplateEditor(false);
+          setEditingTemplate(null);
+        }}
+        onSave={handleUpdateTemplate}
+        onDelete={(templateId) => {
+          deleteTemplate(templateId);
+          setShowTemplateEditor(false);
+          setEditingTemplate(null);
+          toast({
+            title: "Template Deleted",
+            description: "Template has been deleted."
+          });
+        }}
+      />
     </div>
   );
 };

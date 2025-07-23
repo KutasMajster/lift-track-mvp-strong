@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useWorkout } from '@/hooks/useWorkout';
 import { ExerciseDatabase } from './ExerciseDatabase';
 import { WorkoutSummary } from './WorkoutSummary';
+import { ExerciseDetail } from './ExerciseDetail';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Play, Square, Plus, Check, X, Trash2, Timer } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { Exercise } from '@/types/exercise';
 
 export const WorkoutLogger = () => {
   const {
@@ -30,6 +32,8 @@ export const WorkoutLogger = () => {
   const [workoutName, setWorkoutName] = useState('');
   const [showSummary, setShowSummary] = useState(false);
   const [completedWorkout, setCompletedWorkout] = useState(null);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [showExerciseDetail, setShowExerciseDetail] = useState(false);
 
   const handleStartWorkout = () => {
     const name = workoutName.trim() || 'Workout';
@@ -172,7 +176,15 @@ export const WorkoutLogger = () => {
               <Card key={workoutExercise.id}>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{workoutExercise.exercise.name}</CardTitle>
+                    <CardTitle 
+                      className="text-lg cursor-pointer hover:text-primary transition-colors"
+                      onClick={() => {
+                        setSelectedExercise(workoutExercise.exercise);
+                        setShowExerciseDetail(true);
+                      }}
+                    >
+                      {workoutExercise.exercise.name}
+                    </CardTitle>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -254,6 +266,13 @@ export const WorkoutLogger = () => {
           />
         </TabsContent>
       </Tabs>
+
+      <ExerciseDetail
+        exercise={selectedExercise}
+        isOpen={showExerciseDetail}
+        onClose={() => setShowExerciseDetail(false)}
+        showAddButton={false}
+      />
     </div>
   );
 };
