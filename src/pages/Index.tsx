@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { WorkoutLogger } from '@/components/WorkoutLogger';
+import { WorkoutHistory } from '@/components/WorkoutHistory';
+import { ExerciseLibrary } from '@/components/ExerciseLibrary';
 import { BottomNavigation } from '@/components/BottomNavigation';
 
 const Index = () => {
@@ -17,12 +19,9 @@ const Index = () => {
       case 'workout':
         return <WorkoutLogger />;
       case 'history':
-        return (
-          <div className="text-center py-8">
-            <h2 className="text-2xl font-bold mb-4">Workout History</h2>
-            <p className="text-muted-foreground">Coming soon...</p>
-          </div>
-        );
+        return <WorkoutHistory />;
+      case 'library':
+        return <ExerciseLibrary />;
       case 'profile':
         return (
           <div className="text-center py-8">

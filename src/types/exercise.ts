@@ -23,6 +23,14 @@ export interface WorkoutExercise {
   notes?: string;
 }
 
+export interface WorkoutSummary {
+  totalSets: number;
+  totalReps: number;
+  totalWeight: number;
+  exercisesCompleted: number;
+  duration: number;
+}
+
 export interface Workout {
   id: string;
   name: string;
@@ -30,6 +38,19 @@ export interface Workout {
   exercises: WorkoutExercise[];
   duration?: number;
   isCompleted: boolean;
+  summary?: WorkoutSummary;
+}
+
+export interface WorkoutTemplate {
+  id: string;
+  name: string;
+  exercises: {
+    exerciseId: string;
+    exercise: Exercise;
+    targetSets: number;
+  }[];
+  createdFrom?: string; // workout id it was created from
+  createdAt: Date;
 }
 
 export enum ExerciseCategory {

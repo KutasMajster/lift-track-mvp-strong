@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useWorkout } from '@/hooks/useWorkout';
 import { ExerciseDatabase } from './ExerciseDatabase';
+import { WorkoutSummary } from './WorkoutSummary';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +14,6 @@ import { toast } from '@/hooks/use-toast';
 export const WorkoutLogger = () => {
   const {
     currentWorkout,
-    workoutHistory,
     workoutTimer,
     formatTime,
     startWorkout,
@@ -23,10 +23,13 @@ export const WorkoutLogger = () => {
     deleteSet,
     deleteExercise,
     completeWorkout,
-    cancelWorkout
+    cancelWorkout,
+    saveAsTemplate
   } = useWorkout();
 
   const [workoutName, setWorkoutName] = useState('');
+  const [showSummary, setShowSummary] = useState(false);
+  const [completedWorkout, setCompletedWorkout] = useState(null);
 
   const handleStartWorkout = () => {
     const name = workoutName.trim() || 'Workout';
@@ -39,7 +42,11 @@ export const WorkoutLogger = () => {
   };
 
   const handleCompleteWorkout = () => {
-    completeWorkout();
+    const completed = completeWorkout();
+    if (completed) {
+      setCompletedWorkout(completed);
+      setShowSummary(true);
+    }
     toast({
       title: "Workout Completed!",
       description: "Great job! Your workout has been saved."
@@ -53,6 +60,39 @@ export const WorkoutLogger = () => {
       description: "Your workout has been cancelled."
     });
   };
+
+  const handleSaveAsTemplate = () => {
+    if (completedWorkout) {
+      const template = saveAsTemplate(completedWorkout);
+      toast({
+        title: "Template Saved!",
+        description: `"${template.name}" has been saved as a template.`
+      });
+    }
+  };
+
+  const handleStartNewWorkout = () => {
+    setShowSummary(false);
+    setCompletedWorkout(null);
+  };
+
+  const handleCloseSummary = () => {
+    setShowSummary(false);
+    setCompletedWorkout(null);
+  };
+
+  if (showSummary && completedWorkout) {
+    return (
+      <div className="space-y-6">
+        <WorkoutSummary 
+          workout={completedWorkout}
+          onSaveAsTemplate={handleSaveAsTemplate}
+          onStartNewWorkout={handleStartNewWorkout}
+          onClose={handleCloseSummary}
+        />
+      </div>
+    );
+  }
 
   if (!currentWorkout) {
     return (
@@ -76,30 +116,6 @@ export const WorkoutLogger = () => {
           </CardContent>
         </Card>
 
-        {workoutHistory.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Workouts</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {workoutHistory.slice(0, 5).map(workout => (
-                  <div key={workout.id} className="flex items-center justify-between p-3 border rounded">
-                    <div>
-                      <h4 className="font-medium">{workout.name}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {workout.date.toLocaleDateString()} • {workout.exercises.length} exercises
-                      </p>
-                    </div>
-                    <Badge variant="secondary">
-                      {Math.round((workout.duration || 0) / 60000)}m
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
     );
   }
