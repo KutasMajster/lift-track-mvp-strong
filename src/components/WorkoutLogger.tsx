@@ -204,9 +204,14 @@ export const WorkoutLogger = () => {
                           type="number"
                           placeholder="Weight"
                           value={set.weight || ''}
-                          onChange={(e) => updateSet(workoutExercise.id, set.id, { 
-                            weight: parseFloat(e.target.value) || 0 
-                          })}
+                          min="0"
+                          step="0.5"
+                          onChange={(e) => {
+                            const value = parseFloat(e.target.value);
+                            updateSet(workoutExercise.id, set.id, { 
+                              weight: value >= 0 ? value : 0 
+                            });
+                          }}
                           className="w-20"
                         />
                         <span className="self-center text-sm">lbs ×</span>
@@ -214,9 +219,13 @@ export const WorkoutLogger = () => {
                           type="number"
                           placeholder="Reps"
                           value={set.reps || ''}
-                          onChange={(e) => updateSet(workoutExercise.id, set.id, { 
-                            reps: parseInt(e.target.value) || 0 
-                          })}
+                          min="0"
+                          onChange={(e) => {
+                            const value = parseInt(e.target.value);
+                            updateSet(workoutExercise.id, set.id, { 
+                              reps: value >= 0 ? value : 0 
+                            });
+                          }}
                           className="w-16"
                         />
                       </div>

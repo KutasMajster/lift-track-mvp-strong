@@ -4,62 +4,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { History, Play, BookOpen, Trash2, Calendar, Timer, Weight, RotateCcw, Edit, BarChart3 } from 'lucide-react';
+import { History, BookOpen, Calendar, Timer } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { Workout, WorkoutTemplate } from '@/types/exercise';
-import { UserStats } from './UserStats';
-import { TemplateEditor } from './TemplateEditor';
+import { Workout } from '@/types/exercise';
 
 export const WorkoutHistory = () => {
   const { 
     workoutHistory, 
-    workoutTemplates, 
-    startWorkout, 
-    startWorkoutFromTemplate,
-    saveAsTemplate,
-    deleteTemplate,
-    updateTemplate
+    saveAsTemplate
   } = useWorkout();
   
   const [expandedWorkout, setExpandedWorkout] = useState<string | null>(null);
-  const [editingTemplate, setEditingTemplate] = useState<WorkoutTemplate | null>(null);
-  const [showTemplateEditor, setShowTemplateEditor] = useState(false);
 
   const handleSaveAsTemplate = (workout: Workout) => {
     const template = saveAsTemplate(workout);
     toast({
       title: "Template Saved!",
       description: `"${template.name}" has been saved as a template.`
-    });
-  };
-
-  const handleStartFromTemplate = (template: WorkoutTemplate) => {
-    startWorkoutFromTemplate(template);
-    toast({
-      title: "Workout Started!",
-      description: `Started "${template.name}" from template.`
-    });
-  };
-
-  const handleDeleteTemplate = (template: WorkoutTemplate) => {
-    deleteTemplate(template.id);
-    toast({
-      title: "Template Deleted",
-      description: `"${template.name}" template has been deleted.`
-    });
-  };
-
-  const handleEditTemplate = (template: WorkoutTemplate) => {
-    setEditingTemplate(template);
-    setShowTemplateEditor(true);
-  };
-
-  const handleUpdateTemplate = (template: WorkoutTemplate) => {
-    updateTemplate(template);
-    toast({
-      title: "Template Updated",
-      description: `"${template.name}" has been updated.`
     });
   };
 
@@ -90,17 +51,10 @@ export const WorkoutHistory = () => {
           <History className="h-6 w-6" />
           Workout History
         </h2>
-        <p className="text-muted-foreground">Track your progress and manage templates</p>
+        <p className="text-muted-foreground">Track your workout progress over time</p>
       </div>
 
-      <Tabs defaultValue="history" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="history">History</TabsTrigger>
-          <TabsTrigger value="templates">Templates</TabsTrigger>
-          <TabsTrigger value="stats">Stats</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="history" className="space-y-4">
+      <div className="space-y-4">
           {workoutHistory.length === 0 ? (
             <Card>
               <CardContent className="text-center py-8">
@@ -207,104 +161,7 @@ export const WorkoutHistory = () => {
               ))}
             </div>
           )}
-        </TabsContent>
-
-        <TabsContent value="templates" className="space-y-4">
-          {workoutTemplates.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-8">
-                <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">No workout templates saved</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Save a completed workout as a template to reuse it later
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {workoutTemplates.map(template => (
-                <Card key={template.id}>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg">{template.name}</CardTitle>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            {formatDate(template.createdAt)}
-                          </div>
-                          <Badge variant="secondary">
-                            {template.exercises.length} exercises
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleStartFromTemplate(template)}
-                        >
-                          <Play className="h-4 w-4 mr-1" />
-                          Start
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditTemplate(template)}
-                        >
-                          <Edit className="h-4 w-4 mr-1" />
-                          Edit
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteTemplate(template)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {template.exercises.map((exercise, index) => (
-                        <div key={`${exercise.exerciseId}-${index}`} className="flex items-center justify-between text-sm">
-                          <span>{exercise.exercise.name}</span>
-                          <Badge variant="outline">{exercise.targetSets} sets</Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="stats" className="space-y-4">
-          <UserStats workoutHistory={workoutHistory} />
-        </TabsContent>
-      </Tabs>
-
-      <TemplateEditor
-        template={editingTemplate}
-        isOpen={showTemplateEditor}
-        onClose={() => {
-          setShowTemplateEditor(false);
-          setEditingTemplate(null);
-        }}
-        onSave={handleUpdateTemplate}
-        onDelete={(templateId) => {
-          deleteTemplate(templateId);
-          setShowTemplateEditor(false);
-          setEditingTemplate(null);
-          toast({
-            title: "Template Deleted",
-            description: "Template has been deleted."
-          });
-        }}
-      />
+      </div>
     </div>
   );
 };
