@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Workout, WorkoutExercise, WorkoutSet, WorkoutTemplate, WorkoutSummary } from '@/types/exercise';
+import { useProfiles } from './useProfiles';
 import { v4 as uuidv4 } from 'uuid';
 
 const WORKOUT_STORAGE_KEY = 'iron-gains-current-workout';
@@ -8,53 +9,82 @@ const HISTORY_STORAGE_KEY = 'iron-gains-workout-history';
 const TEMPLATES_STORAGE_KEY = 'iron-gains-workout-templates';
 
 export const useWorkout = () => {
+  const { activeProfile } = useProfiles();
+  
+  // Profile-specific storage keys
+  const profileCurrentWorkoutKey = `${WORKOUT_STORAGE_KEY}-${activeProfile?.id || 'default'}`;
+  const profileWorkoutHistoryKey = `${HISTORY_STORAGE_KEY}-${activeProfile?.id || 'default'}`;
+  const profileWorkoutTemplatesKey = `${TEMPLATES_STORAGE_KEY}-${activeProfile?.id || 'default'}`;
+  const profileWorkoutTimerKey = `${TIMER_STORAGE_KEY}-${activeProfile?.id || 'default'}`;
+
   const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(() => {
-    const saved = localStorage.getItem(WORKOUT_STORAGE_KEY);
+    const saved = localStorage.getItem(profileCurrentWorkoutKey);
     return saved ? JSON.parse(saved) : null;
   });
   
   const [workoutHistory, setWorkoutHistory] = useState<Workout[]>(() => {
-    const saved = localStorage.getItem(HISTORY_STORAGE_KEY);
+    const saved = localStorage.getItem(profileWorkoutHistoryKey);
     return saved ? JSON.parse(saved) : [];
   });
   
   const [workoutTemplates, setWorkoutTemplates] = useState<WorkoutTemplate[]>(() => {
-    const saved = localStorage.getItem(TEMPLATES_STORAGE_KEY);
+    const saved = localStorage.getItem(profileWorkoutTemplatesKey);
     return saved ? JSON.parse(saved) : [];
   });
   
   const [workoutTimer, setWorkoutTimer] = useState<number>(() => {
-    const saved = localStorage.getItem(TIMER_STORAGE_KEY);
+    const saved = localStorage.getItem(profileWorkoutTimerKey);
     return saved ? parseInt(saved) : 0;
   });
+
+  // Reload data when active profile changes
+  useEffect(() => {
+    const saved = localStorage.getItem(profileCurrentWorkoutKey);
+    setCurrentWorkout(saved ? JSON.parse(saved) : null);
+  }, [activeProfile?.id, profileCurrentWorkoutKey]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(profileWorkoutHistoryKey);
+    setWorkoutHistory(saved ? JSON.parse(saved) : []);
+  }, [activeProfile?.id, profileWorkoutHistoryKey]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(profileWorkoutTemplatesKey);
+    setWorkoutTemplates(saved ? JSON.parse(saved) : []);
+  }, [activeProfile?.id, profileWorkoutTemplatesKey]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(profileWorkoutTimerKey);
+    setWorkoutTimer(saved ? parseInt(saved) : 0);
+  }, [activeProfile?.id, profileWorkoutTimerKey]);
 
   // Persist current workout to localStorage
   useEffect(() => {
     if (currentWorkout) {
-      localStorage.setItem(WORKOUT_STORAGE_KEY, JSON.stringify(currentWorkout));
+      localStorage.setItem(profileCurrentWorkoutKey, JSON.stringify(currentWorkout));
     } else {
-      localStorage.removeItem(WORKOUT_STORAGE_KEY);
+      localStorage.removeItem(profileCurrentWorkoutKey);
     }
-  }, [currentWorkout]);
+  }, [currentWorkout, profileCurrentWorkoutKey]);
 
   // Persist timer to localStorage
   useEffect(() => {
     if (currentWorkout && !currentWorkout.isCompleted) {
-      localStorage.setItem(TIMER_STORAGE_KEY, workoutTimer.toString());
+      localStorage.setItem(profileWorkoutTimerKey, workoutTimer.toString());
     } else {
-      localStorage.removeItem(TIMER_STORAGE_KEY);
+      localStorage.removeItem(profileWorkoutTimerKey);
     }
-  }, [workoutTimer, currentWorkout]);
+  }, [workoutTimer, currentWorkout, profileWorkoutTimerKey]);
 
   // Persist history to localStorage
   useEffect(() => {
-    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(workoutHistory));
-  }, [workoutHistory]);
+    localStorage.setItem(profileWorkoutHistoryKey, JSON.stringify(workoutHistory));
+  }, [workoutHistory, profileWorkoutHistoryKey]);
 
   // Persist templates to localStorage
   useEffect(() => {
-    localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(workoutTemplates));
-  }, [workoutTemplates]);
+    localStorage.setItem(profileWorkoutTemplatesKey, JSON.stringify(workoutTemplates));
+  }, [workoutTemplates, profileWorkoutTemplatesKey]);
 
   // Timer effect
   useEffect(() => {

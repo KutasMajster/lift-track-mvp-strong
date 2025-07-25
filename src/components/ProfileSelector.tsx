@@ -82,13 +82,16 @@ export const ProfileSelector = ({ isOpen, onClose }: ProfileSelectorProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md" aria-describedby="profile-selector-description">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
             Select Profile
           </DialogTitle>
         </DialogHeader>
+        <div id="profile-selector-description" className="sr-only">
+          Choose or create a user profile to personalize your workout experience
+        </div>
 
         <div className="space-y-4">
           {/* Existing Profiles */}

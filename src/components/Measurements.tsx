@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Ruler, Plus, TrendingUp, Calendar } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useProfiles } from '@/hooks/useProfiles';
 
 export interface Measurement {
   id: string;
@@ -40,8 +41,11 @@ const MEASUREMENT_TYPES: MeasurementType[] = [
 const MEASUREMENTS_STORAGE_KEY = 'iron-gains-measurements';
 
 export const Measurements = () => {
+  const { activeProfile } = useProfiles();
+  const profileMeasurementsKey = `${MEASUREMENTS_STORAGE_KEY}-${activeProfile?.id || 'default'}`;
+  
   const [measurements, setMeasurements] = useState<Measurement[]>(() => {
-    const saved = localStorage.getItem(MEASUREMENTS_STORAGE_KEY);
+    const saved = localStorage.getItem(profileMeasurementsKey);
     return saved ? JSON.parse(saved) : [];
   });
   
@@ -49,10 +53,16 @@ export const Measurements = () => {
   const [value, setValue] = useState('');
   const [notes, setNotes] = useState('');
 
+  // Reload measurements when profile changes
+  useEffect(() => {
+    const saved = localStorage.getItem(profileMeasurementsKey);
+    setMeasurements(saved ? JSON.parse(saved) : []);
+  }, [activeProfile?.id, profileMeasurementsKey]);
+
   // Persist measurements to localStorage
   useEffect(() => {
-    localStorage.setItem(MEASUREMENTS_STORAGE_KEY, JSON.stringify(measurements));
-  }, [measurements]);
+    localStorage.setItem(profileMeasurementsKey, JSON.stringify(measurements));
+  }, [measurements, profileMeasurementsKey]);
 
   const handleAddMeasurement = () => {
     if (!value || parseFloat(value) <= 0) {

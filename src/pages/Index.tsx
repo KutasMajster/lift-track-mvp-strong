@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { WorkoutLogger } from '@/components/WorkoutLogger';
 import { WorkoutHistory } from '@/components/WorkoutHistory';
 import { ExerciseLibrary } from '@/components/ExerciseLibrary';
@@ -13,12 +13,21 @@ import { useProfiles } from '@/hooks/useProfiles';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { User } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('workout');
   const { workoutHistory, workoutTemplates } = useWorkout();
   const { activeProfile, profiles } = useProfiles();
+  const { setTheme } = useTheme();
   const [showProfileSelector, setShowProfileSelector] = useState(!activeProfile || profiles.length === 0);
+
+  // Apply theme when profile changes
+  useEffect(() => {
+    if (activeProfile?.settings.theme) {
+      setTheme(activeProfile.settings.theme);
+    }
+  }, [activeProfile?.settings.theme, setTheme]);
 
   const renderContent = () => {
     switch (activeTab) {

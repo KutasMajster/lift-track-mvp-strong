@@ -7,9 +7,11 @@ import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Settings, Palette, Scale, Ruler } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useTheme } from 'next-themes';
 
 export const ProfileSettings = () => {
   const { activeProfile, updateSettings } = useProfiles();
+  const { setTheme } = useTheme();
 
   if (!activeProfile) {
     return (
@@ -21,6 +23,7 @@ export const ProfileSettings = () => {
 
   const handleThemeChange = (theme: 'light' | 'dark' | 'system') => {
     updateSettings({ theme });
+    setTheme(theme); // Apply theme immediately
     toast({
       title: "Theme Updated",
       description: `Theme changed to ${theme}`
