@@ -3,6 +3,7 @@ import { useWorkout } from '@/hooks/useWorkout';
 import { ExerciseDatabase } from './ExerciseDatabase';
 import { WorkoutSummary } from './WorkoutSummary';
 import { ExerciseDetail } from './ExerciseDetail';
+import { RestTimer } from './RestTimer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,6 +35,7 @@ export const WorkoutLogger = () => {
   const [completedWorkout, setCompletedWorkout] = useState(null);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [showExerciseDetail, setShowExerciseDetail] = useState(false);
+  const [showRestTimer, setShowRestTimer] = useState(false);
 
   const handleStartWorkout = () => {
     const name = workoutName.trim() || 'Workout';
@@ -233,9 +235,14 @@ export const WorkoutLogger = () => {
                         <Button
                           variant={set.isCompleted ? "default" : "outline"}
                           size="sm"
-                          onClick={() => updateSet(workoutExercise.id, set.id, { 
-                            isCompleted: !set.isCompleted 
-                          })}
+                          onClick={() => {
+                            updateSet(workoutExercise.id, set.id, { 
+                              isCompleted: !set.isCompleted 
+                            });
+                            if (!set.isCompleted) {
+                              setShowRestTimer(true);
+                            }
+                          }}
                         >
                           <Check className="h-4 w-4" />
                         </Button>
@@ -281,6 +288,12 @@ export const WorkoutLogger = () => {
         isOpen={showExerciseDetail}
         onClose={() => setShowExerciseDetail(false)}
         showAddButton={false}
+      />
+      
+      <RestTimer
+        isOpen={showRestTimer}
+        onClose={() => setShowRestTimer(false)}
+        defaultTime={90}
       />
     </div>
   );

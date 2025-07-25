@@ -16,9 +16,9 @@ import { User } from 'lucide-react';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('workout');
-  const [showProfileSelector, setShowProfileSelector] = useState(false);
   const { workoutHistory, workoutTemplates } = useWorkout();
-  const { activeProfile } = useProfiles();
+  const { activeProfile, profiles } = useProfiles();
+  const [showProfileSelector, setShowProfileSelector] = useState(!activeProfile || profiles.length === 0);
 
   const renderContent = () => {
     switch (activeTab) {

@@ -136,6 +136,47 @@ export const Measurements = () => {
         </TabsList>
 
         <TabsContent value="add" className="space-y-6">
+          {/* Current Stats Overview */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Current Stats</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {MEASUREMENT_TYPES.map(type => {
+                  const latest = getLatestMeasurement(type.id);
+                  const progress = calculateProgress(type.id);
+                  
+                  return (
+                    <div key={type.id} className="text-center p-3 border rounded-lg">
+                      <div className="font-medium text-sm">{type.name}</div>
+                      {latest ? (
+                        <>
+                          <div className="text-xl font-bold">
+                            {latest.value} {type.unit}
+                          </div>
+                          {progress && (
+                            <div className={`text-xs flex items-center justify-center gap-1 ${
+                              progress.isPositive ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                              <TrendingUp className="h-3 w-3" />
+                              {progress.isPositive ? '+' : ''}{progress.diff.toFixed(1)} {type.unit}
+                            </div>
+                          )}
+                          <div className="text-xs text-muted-foreground">
+                            {formatDate(latest.date)}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-muted-foreground text-sm">No data</div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -189,47 +230,6 @@ export const Measurements = () => {
                 <Plus className="h-4 w-4 mr-2" />
                 Add Measurement
               </Button>
-            </CardContent>
-          </Card>
-
-          {/* Current Stats Overview */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Current Stats</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {MEASUREMENT_TYPES.map(type => {
-                  const latest = getLatestMeasurement(type.id);
-                  const progress = calculateProgress(type.id);
-                  
-                  return (
-                    <div key={type.id} className="text-center p-3 border rounded-lg">
-                      <div className="font-medium text-sm">{type.name}</div>
-                      {latest ? (
-                        <>
-                          <div className="text-xl font-bold">
-                            {latest.value} {type.unit}
-                          </div>
-                          {progress && (
-                            <div className={`text-xs flex items-center justify-center gap-1 ${
-                              progress.isPositive ? 'text-green-600' : 'text-red-600'
-                            }`}>
-                              <TrendingUp className="h-3 w-3" />
-                              {progress.isPositive ? '+' : ''}{progress.diff.toFixed(1)} {type.unit}
-                            </div>
-                          )}
-                          <div className="text-xs text-muted-foreground">
-                            {formatDate(latest.date)}
-                          </div>
-                        </>
-                      ) : (
-                        <div className="text-muted-foreground text-sm">No data</div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
             </CardContent>
           </Card>
         </TabsContent>

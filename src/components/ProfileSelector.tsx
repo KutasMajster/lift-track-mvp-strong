@@ -47,17 +47,19 @@ export const ProfileSelector = ({ isOpen, onClose }: ProfileSelectorProps) => {
       title: "Profile Created!",
       description: `Welcome, ${newProfileName}!`
     });
+    
+    onClose();
   };
 
   const handleSwitchProfile = (profileId: string) => {
     const profile = profiles.find(p => p.id === profileId);
     if (profile) {
       switchProfile(profileId);
-      onClose();
       toast({
         title: "Profile Switched",
         description: `Switched to ${profile.name}'s profile`
       });
+      onClose();
     }
   };
 
