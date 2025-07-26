@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useWorkout } from '@/hooks/useWorkout';
+import { useUnitConversion } from '@/hooks/useUnitConversion';
 import { ExerciseDatabase } from './ExerciseDatabase';
 import { WorkoutSummary } from './WorkoutSummary';
 import { ExerciseDetail } from './ExerciseDetail';
@@ -29,6 +30,8 @@ export const WorkoutLogger = () => {
     cancelWorkout,
     saveAsTemplate
   } = useWorkout();
+
+  const { convertWeight, convertWeightToStorage, getWeightUnit } = useUnitConversion();
 
   const [workoutName, setWorkoutName] = useState('');
   const [showSummary, setShowSummary] = useState(false);
@@ -205,18 +208,25 @@ export const WorkoutLogger = () => {
                         <Input
                           type="number"
                           placeholder="Weight"
-                          value={set.weight || ''}
+                          value={set.weight ? convertWeight(set.weight).value : ''}
                           min="0"
                           step="0.5"
                           onChange={(e) => {
                             const value = parseFloat(e.target.value);
-                            updateSet(workoutExercise.id, set.id, { 
-                              weight: value >= 0 ? value : 0 
-                            });
+                            if (value >= 0) {
+                              const weightForStorage = convertWeightToStorage(value);
+                              updateSet(workoutExercise.id, set.id, { 
+                                weight: weightForStorage 
+                              });
+                            } else {
+                              updateSet(workoutExercise.id, set.id, { 
+                                weight: 0 
+                              });
+                            }
                           }}
                           className="w-20"
                         />
-                        <span className="self-center text-sm">lbs ×</span>
+                        <span className="self-center text-sm">{getWeightUnit()} ×</span>
                         <Input
                           type="number"
                           placeholder="Reps"

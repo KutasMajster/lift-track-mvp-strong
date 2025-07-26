@@ -22,8 +22,8 @@ export const ProfileSettings = () => {
   }
 
   const handleThemeChange = (theme: 'light' | 'dark' | 'system') => {
-    updateSettings({ theme });
-    setTheme(theme); // Apply theme immediately
+    setTheme(theme); // Apply theme immediately first
+    updateSettings({ theme }); // Then update profile settings
     toast({
       title: "Theme Updated",
       description: `Theme changed to ${theme}`
