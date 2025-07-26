@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Ruler, Plus, TrendingUp, Calendar } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useProfiles } from '@/hooks/useProfiles';
+import { useUnitConversion } from '@/hooks/useUnitConversion';
 
 export interface Measurement {
   id: string;
@@ -26,38 +27,43 @@ export interface MeasurementType {
   category: 'body' | 'performance';
 }
 
-const MEASUREMENT_TYPES: MeasurementType[] = [
-  { id: 'weight', name: 'Weight', unit: 'lbs', category: 'body' },
+const getMeasurementTypes = (getWeightUnit: () => string, getLengthUnit: () => string): MeasurementType[] => [
+  { id: 'weight', name: 'Weight', unit: getWeightUnit(), category: 'body' },
   { id: 'body_fat', name: 'Body Fat %', unit: '%', category: 'body' },
-  { id: 'muscle_mass', name: 'Muscle Mass', unit: 'lbs', category: 'body' },
-  { id: 'chest', name: 'Chest', unit: 'in', category: 'body' },
-  { id: 'bicep', name: 'Bicep', unit: 'in', category: 'body' },
-  { id: 'waist', name: 'Waist', unit: 'in', category: 'body' },
-  { id: 'thigh', name: 'Thigh', unit: 'in', category: 'body' },
-  { id: 'neck', name: 'Neck', unit: 'in', category: 'body' },
-  { id: 'forearm', name: 'Forearm', unit: 'in', category: 'body' }
+  { id: 'muscle_mass', name: 'Muscle Mass', unit: getWeightUnit(), category: 'body' },
+  { id: 'chest', name: 'Chest', unit: getLengthUnit(), category: 'body' },
+  { id: 'bicep', name: 'Bicep', unit: getLengthUnit(), category: 'body' },
+  { id: 'waist', name: 'Waist', unit: getLengthUnit(), category: 'body' },
+  { id: 'thigh', name: 'Thigh', unit: getLengthUnit(), category: 'body' },
+  { id: 'neck', name: 'Neck', unit: getLengthUnit(), category: 'body' },
+  { id: 'forearm', name: 'Forearm', unit: getLengthUnit(), category: 'body' }
 ];
 
 const MEASUREMENTS_STORAGE_KEY = 'iron-gains-measurements';
 
 export const Measurements = () => {
   const { activeProfile } = useProfiles();
+  const { convertWeight, convertLength, convertWeightToStorage, convertLengthToStorage, getWeightUnit, getLengthUnit } = useUnitConversion();
   const profileMeasurementsKey = `${MEASUREMENTS_STORAGE_KEY}-${activeProfile?.id || 'default'}`;
   
   const [measurements, setMeasurements] = useState<Measurement[]>(() => {
     const saved = localStorage.getItem(profileMeasurementsKey);
     return saved ? JSON.parse(saved) : [];
   });
+
+  const MEASUREMENT_TYPES = getMeasurementTypes(getWeightUnit, getLengthUnit);
   
   const [selectedType, setSelectedType] = useState<MeasurementType>(MEASUREMENT_TYPES[0]);
   const [value, setValue] = useState('');
   const [notes, setNotes] = useState('');
 
-  // Reload measurements when profile changes
+  // Reload measurements when profile changes - force fresh data
   useEffect(() => {
-    const saved = localStorage.getItem(profileMeasurementsKey);
-    setMeasurements(saved ? JSON.parse(saved) : []);
-  }, [activeProfile?.id, profileMeasurementsKey]);
+    if (activeProfile?.id) {
+      const saved = localStorage.getItem(profileMeasurementsKey);
+      setMeasurements(saved ? JSON.parse(saved) : []);
+    }
+  }, [activeProfile?.id]);
 
   // Persist measurements to localStorage
   useEffect(() => {
@@ -74,11 +80,23 @@ export const Measurements = () => {
       return;
     }
 
+    // Convert user input to storage format (always store in lbs/inches)
+    let storageValue = parseFloat(value);
+    let storageUnit = selectedType.unit;
+    
+    if (selectedType.id === 'weight' || selectedType.id === 'muscle_mass') {
+      storageValue = convertWeightToStorage(parseFloat(value));
+      storageUnit = 'lbs'; // Always store weight in lbs
+    } else if (['chest', 'bicep', 'waist', 'thigh', 'neck', 'forearm'].includes(selectedType.id)) {
+      storageValue = convertLengthToStorage(parseFloat(value));
+      storageUnit = 'in'; // Always store lengths in inches
+    }
+
     const measurement: Measurement = {
       id: `${Date.now()}-${Math.random()}`,
       type: selectedType.id,
-      value: parseFloat(value),
-      unit: selectedType.unit,
+      value: storageValue,
+      unit: storageUnit,
       date: new Date(),
       notes: notes.trim() || undefined
     };
@@ -157,20 +175,36 @@ export const Measurements = () => {
                   const latest = getLatestMeasurement(type.id);
                   const progress = calculateProgress(type.id);
                   
+                  // Convert stored value to display value
+                  let displayValue = latest?.value || 0;
+                  let displayUnit = type.unit;
+                  
+                  if (latest) {
+                    if (type.id === 'weight' || type.id === 'muscle_mass') {
+                      const converted = convertWeight(latest.value);
+                      displayValue = converted.value;
+                      displayUnit = converted.unit;
+                    } else if (['chest', 'bicep', 'waist', 'thigh', 'neck', 'forearm'].includes(type.id)) {
+                      const converted = convertLength(latest.value);
+                      displayValue = converted.value;
+                      displayUnit = converted.unit;
+                    }
+                  }
+                  
                   return (
                     <div key={type.id} className="text-center p-3 border rounded-lg">
                       <div className="font-medium text-sm">{type.name}</div>
                       {latest ? (
                         <>
                           <div className="text-xl font-bold">
-                            {latest.value} {type.unit}
+                            {displayValue} {displayUnit}
                           </div>
                           {progress && (
                             <div className={`text-xs flex items-center justify-center gap-1 ${
                               progress.isPositive ? 'text-green-600' : 'text-red-600'
                             }`}>
                               <TrendingUp className="h-3 w-3" />
-                              {progress.isPositive ? '+' : ''}{progress.diff.toFixed(1)} {type.unit}
+                              {progress.isPositive ? '+' : ''}{progress.diff.toFixed(1)} {displayUnit}
                             </div>
                           )}
                           <div className="text-xs text-muted-foreground">
@@ -268,11 +302,26 @@ export const Measurements = () => {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {history.slice(0, 5).map((measurement, index) => (
+                        {history.slice(0, 5).map((measurement, index) => {
+                          // Convert stored value to display value
+                          let displayValue = measurement.value;
+                          let displayUnit = type.unit;
+                          
+                          if (type.id === 'weight' || type.id === 'muscle_mass') {
+                            const converted = convertWeight(measurement.value);
+                            displayValue = converted.value;
+                            displayUnit = converted.unit;
+                          } else if (['chest', 'bicep', 'waist', 'thigh', 'neck', 'forearm'].includes(type.id)) {
+                            const converted = convertLength(measurement.value);
+                            displayValue = converted.value;
+                            displayUnit = converted.unit;
+                          }
+                          
+                          return (
                           <div key={measurement.id} className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <Badge variant={index === 0 ? "default" : "secondary"}>
-                                {measurement.value} {measurement.unit}
+                                {displayValue} {displayUnit}
                               </Badge>
                               {measurement.notes && (
                                 <span className="text-sm text-muted-foreground">
@@ -285,7 +334,8 @@ export const Measurements = () => {
                               {formatDate(measurement.date)}
                             </div>
                           </div>
-                        ))}
+                          );
+                        })}
                       </div>
                       {history.length > 5 && (
                         <div className="text-center mt-3">

@@ -37,26 +37,34 @@ export const useWorkout = () => {
     return saved ? parseInt(saved) : 0;
   });
 
-  // Reload data when active profile changes
+  // Reload data when active profile changes - force fresh data
   useEffect(() => {
-    const saved = localStorage.getItem(profileCurrentWorkoutKey);
-    setCurrentWorkout(saved ? JSON.parse(saved) : null);
-  }, [activeProfile?.id, profileCurrentWorkoutKey]);
+    if (activeProfile?.id) {
+      const saved = localStorage.getItem(profileCurrentWorkoutKey);
+      setCurrentWorkout(saved ? JSON.parse(saved) : null);
+    }
+  }, [activeProfile?.id]);
 
   useEffect(() => {
-    const saved = localStorage.getItem(profileWorkoutHistoryKey);
-    setWorkoutHistory(saved ? JSON.parse(saved) : []);
-  }, [activeProfile?.id, profileWorkoutHistoryKey]);
+    if (activeProfile?.id) {
+      const saved = localStorage.getItem(profileWorkoutHistoryKey);
+      setWorkoutHistory(saved ? JSON.parse(saved) : []);
+    }
+  }, [activeProfile?.id]);
 
   useEffect(() => {
-    const saved = localStorage.getItem(profileWorkoutTemplatesKey);
-    setWorkoutTemplates(saved ? JSON.parse(saved) : []);
-  }, [activeProfile?.id, profileWorkoutTemplatesKey]);
+    if (activeProfile?.id) {
+      const saved = localStorage.getItem(profileWorkoutTemplatesKey);
+      setWorkoutTemplates(saved ? JSON.parse(saved) : []);
+    }
+  }, [activeProfile?.id]);
 
   useEffect(() => {
-    const saved = localStorage.getItem(profileWorkoutTimerKey);
-    setWorkoutTimer(saved ? parseInt(saved) : 0);
-  }, [activeProfile?.id, profileWorkoutTimerKey]);
+    if (activeProfile?.id) {
+      const saved = localStorage.getItem(profileWorkoutTimerKey);
+      setWorkoutTimer(saved ? parseInt(saved) : 0);
+    }
+  }, [activeProfile?.id]);
 
   // Persist current workout to localStorage
   useEffect(() => {
@@ -282,15 +290,21 @@ export const useWorkout = () => {
   }, []);
 
   const deleteTemplate = useCallback((templateId: string) => {
-    setWorkoutTemplates(prev => prev.filter(t => t.id !== templateId));
+    setWorkoutTemplates(prev => {
+      const filtered = prev.filter(t => t.id !== templateId);
+      // Force a new array reference to ensure re-render
+      return [...filtered];
+    });
   }, []);
 
   const updateTemplate = useCallback((updatedTemplate: WorkoutTemplate) => {
-    setWorkoutTemplates(prev => 
-      prev.map(template => 
+    setWorkoutTemplates(prev => {
+      const updated = prev.map(template => 
         template.id === updatedTemplate.id ? updatedTemplate : template
-      )
-    );
+      );
+      // Force a new array reference to ensure re-render
+      return [...updated];
+    });
   }, []);
 
   const formatTime = (seconds: number) => {
