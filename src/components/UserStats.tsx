@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, Calendar, Weight, Target, Timer } from 'lucide-react';
+import { useUnitConversion } from '@/hooks/useUnitConversion';
 import { Workout } from '@/types/exercise';
 
 interface UserStatsProps {
@@ -8,6 +9,7 @@ interface UserStatsProps {
 }
 
 export const UserStats = ({ workoutHistory }: UserStatsProps) => {
+  const { convertWeight, getWeightUnit } = useUnitConversion();
   const completedWorkouts = workoutHistory.filter(w => w.isCompleted);
   
   const totalWorkouts = completedWorkouts.length;
@@ -58,7 +60,7 @@ export const UserStats = ({ workoutHistory }: UserStatsProps) => {
     },
     {
       title: "Weight Lifted",
-      value: `${Math.round(totalWeight).toLocaleString()} lbs`,
+      value: `${Math.round(convertWeight(totalWeight).value).toLocaleString()} ${getWeightUnit()}`,
       icon: Weight,
       color: "text-green-500"
     },

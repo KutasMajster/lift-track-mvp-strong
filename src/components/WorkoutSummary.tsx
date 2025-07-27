@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Timer, Weight, RotateCcw } from 'lucide-react';
+import { useUnitConversion } from '@/hooks/useUnitConversion';
 import { Workout } from '@/types/exercise';
 
 interface WorkoutSummaryProps {
@@ -17,6 +18,8 @@ export const WorkoutSummary = ({
   onStartNewWorkout,
   onClose 
 }: WorkoutSummaryProps) => {
+  const { convertWeight, getWeightUnit } = useUnitConversion();
+  
   const formatDuration = (duration: number) => {
     const minutes = Math.round(duration / 60000);
     const hours = Math.floor(minutes / 60);
@@ -50,8 +53,8 @@ export const WorkoutSummary = ({
               <div className="text-xs text-muted-foreground">Total Reps</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold">{Math.round(workout.summary.totalWeight)}</div>
-              <div className="text-xs text-muted-foreground">lbs Moved</div>
+              <div className="text-2xl font-bold">{Math.round(convertWeight(workout.summary.totalWeight).value)}</div>
+              <div className="text-xs text-muted-foreground">{getWeightUnit()} Moved</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold">

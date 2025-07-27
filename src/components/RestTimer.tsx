@@ -1,56 +1,24 @@
-import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Timer, Play, Pause, RotateCcw, X } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { Progress } from '@/components/ui/progress';
 
 interface RestTimerProps {
   isOpen: boolean;
   onClose: () => void;
   defaultTime?: number;
+  isActive: boolean;
+  timeLeft: number;
+  isRunning: boolean;
+  onReopen: () => void;
+  onPause: () => void;
+  onResume: () => void;
+  onReset: () => void;
+  onSetTime: (seconds: number) => void;
 }
 
-export const RestTimer = ({ isOpen, onClose, defaultTime = 90 }: RestTimerProps) => {
-  const [timeLeft, setTimeLeft] = useState(defaultTime);
-  const [isRunning, setIsRunning] = useState(false);
-  const [initialTime, setInitialTime] = useState(defaultTime);
-
-  useEffect(() => {
-    if (isOpen && !isRunning) {
-      setTimeLeft(defaultTime);
-      setInitialTime(defaultTime);
-    }
-  }, [isOpen, defaultTime]);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (isRunning && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            setIsRunning(false);
-            // Play notification sound
-            const audio = new Audio();
-            audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmUeHi2M0fPTgDUHHjS+7+WTUwwOUa7k8a1iGzJGn+Deu2YdGS2J0fPSgDUHHz6+7+WTUwwOUa7k8a1iGzNGn+Deu2YdGSyJ0fPTgDUHHj6+7+WTUwwOUa7k8a1iGzNGn+Deu2YdGSuJ0fPTgDUHHTu+7+aTUwgNU6zk8K5jGzVGnuDeu2UdGiyI0PLSgDYGHT2+7+STTwkOUa7k8a1iGjNGn+Dfu2UdGSyJ0fPTgDUHHTq+7+aYTwkOUa7k8a1gGzNGn+Dfu2UdGSyJ0fPTgDUHDzq+7+aYTwkOUa7k8q1gGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+WYTwkOUa7k8q1gGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+STTwkOUa7k8q1gGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+STTwgOU6zk8a1gGzVGn+Dfu2UdGSyI0PLTgDUHDzq+7+STTgkOUa7k8q1gGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+STTgkOUa7k8q1gGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+STTgkOUa7k8q1gGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+STTgkOUa7k8q1gGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+SdTwkOUa7k8q1gGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+SdTwkOUa7k8q1gGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+SdTwkOUa7k8q1gGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+SdTwkOUa7k8q1gGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+SdTwkOUa7k8q1gGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+SdTwkOUa7k8q1gGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOU67k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8qxhGzNGn+Dfu2UdGSyI0PLTgDUHDzq+7+OdTwkOUa7k8q';
-            audio.play().catch(() => {
-              // Fallback if audio doesn't play
-              console.log('Audio notification failed, using visual only');
-            });
-            toast({
-              title: "Rest Time Complete!",
-              description: "Time to start your next set!"
-            });
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    
-    return () => clearInterval(interval);
-  }, [isRunning, timeLeft]);
+export const RestTimer = ({ isOpen, onClose, defaultTime = 90, isActive, timeLeft, isRunning, onReopen, onPause, onResume, onReset, onSetTime }: RestTimerProps) => {
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -58,103 +26,110 @@ export const RestTimer = ({ isOpen, onClose, defaultTime = 90 }: RestTimerProps)
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleStart = () => {
-    setIsRunning(true);
-  };
-
-  const handlePause = () => {
-    setIsRunning(false);
-  };
-
-  const handleReset = () => {
-    setIsRunning(false);
-    setTimeLeft(initialTime);
-  };
-
-  const handleSetTime = (seconds: number) => {
-    setTimeLeft(seconds);
-    setInitialTime(seconds);
-    setIsRunning(false);
-  };
-
-  const progress = ((initialTime - timeLeft) / initialTime) * 100;
+  const progress = defaultTime > 0 ? ((defaultTime - timeLeft) / defaultTime) * 100 : 0;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Timer className="h-5 w-5" />
             Rest Timer
           </DialogTitle>
         </DialogHeader>
-
+        
         <div className="space-y-6">
-          {/* Timer Display */}
-          <div className="text-center">
-            <div className="relative w-32 h-32 mx-auto mb-4">
-              <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 100 100">
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="45"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  fill="transparent"
-                  className="text-muted-foreground/20"
-                />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="45"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  fill="transparent"
-                  strokeDasharray={`${2 * Math.PI * 45}`}
-                  strokeDashoffset={`${2 * Math.PI * 45 * (1 - progress / 100)}`}
-                  className="text-primary transition-all duration-1000"
-                />
-              </svg>
+          {/* Circular Progress */}
+          <div className="flex items-center justify-center">
+            <div className="relative w-40 h-40">
+              <Progress 
+                value={progress} 
+                className="w-full h-full rounded-full [&>div]:rounded-full"
+              />
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-3xl font-bold">{formatTime(timeLeft)}</span>
+                <div className="text-center">
+                  <div className="text-4xl font-bold">
+                    {formatTime(timeLeft)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {isRunning ? 'Running' : 'Paused'}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Quick Time Buttons */}
           <div className="grid grid-cols-4 gap-2">
-            {[30, 60, 90, 120].map(seconds => (
-              <Button
-                key={seconds}
-                variant={initialTime === seconds ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleSetTime(seconds)}
-                disabled={isRunning}
-              >
-                {seconds}s
-              </Button>
-            ))}
-          </div>
-
-          {/* Control Buttons */}
-          <div className="flex gap-2">
-            {!isRunning ? (
-              <Button onClick={handleStart} className="flex-1" disabled={timeLeft === 0}>
-                <Play className="h-4 w-4 mr-2" />
-                Start
-              </Button>
-            ) : (
-              <Button onClick={handlePause} className="flex-1" variant="outline">
-                <Pause className="h-4 w-4 mr-2" />
-                Pause
-              </Button>
-            )}
-            <Button onClick={handleReset} variant="outline" size="sm">
-              <RotateCcw className="h-4 w-4" />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onSetTime(30)}
+              className="text-xs"
+            >
+              30s
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onSetTime(60)}
+              className="text-xs"
+            >
+              60s
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onSetTime(90)}
+              className="text-xs"
+            >
+              90s
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onSetTime(120)}
+              className="text-xs"
+            >
+              120s
             </Button>
           </div>
 
-          <Button onClick={onClose} variant="ghost" className="w-full">
+          {/* Control Buttons */}
+          <div className="flex gap-2 justify-center">
+            {isRunning ? (
+              <Button
+                variant="outline"
+                onClick={onPause}
+              >
+                <Pause className="h-4 w-4 mr-2" />
+                Pause
+              </Button>
+            ) : (
+              <Button
+                onClick={onResume}
+                disabled={timeLeft === 0}
+              >
+                <Play className="h-4 w-4 mr-2" />
+                Resume
+              </Button>
+            )}
+            
+            <Button
+              variant="outline"
+              onClick={onReset}
+            >
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Reset
+            </Button>
+          </div>
+
+          {/* Close Button */}
+          <Button
+            variant="ghost"
+            onClick={onClose}
+            className="w-full"
+          >
             <X className="h-4 w-4 mr-2" />
             Close Timer
           </Button>

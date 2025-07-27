@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useWorkout } from '@/hooks/useWorkout';
+import { useUnitConversion } from '@/hooks/useUnitConversion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +14,7 @@ export const WorkoutHistory = () => {
     workoutHistory, 
     saveAsTemplate
   } = useWorkout();
+  const { convertWeight, getWeightUnit } = useUnitConversion();
   
   const [expandedWorkout, setExpandedWorkout] = useState<string | null>(null);
 
@@ -123,8 +125,8 @@ export const WorkoutHistory = () => {
                           <div className="text-xs text-muted-foreground">Reps</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-2xl font-bold">{Math.round(workout.summary.totalWeight)}</div>
-                          <div className="text-xs text-muted-foreground">lbs Moved</div>
+                          <div className="text-2xl font-bold">{Math.round(convertWeight(workout.summary.totalWeight).value)}</div>
+                          <div className="text-xs text-muted-foreground">{getWeightUnit()} Moved</div>
                         </div>
                         <div className="text-center">
                           <div className="text-2xl font-bold">{workout.summary.exercisesCompleted}</div>
@@ -143,7 +145,7 @@ export const WorkoutHistory = () => {
                                   {exercise.sets.map((set, index) => (
                                     <div key={set.id} className="flex items-center gap-3 text-sm">
                                       <span className="w-8">Set {index + 1}:</span>
-                                      <span>{set.weight} lbs × {set.reps} reps</span>
+                                      <span>{convertWeight(set.weight).value} {getWeightUnit()} × {set.reps} reps</span>
                                       {set.isCompleted && (
                                         <Badge variant="secondary" className="text-xs">✓</Badge>
                                       )}

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useWorkout } from '@/hooks/useWorkout';
 import { useUnitConversion } from '@/hooks/useUnitConversion';
+import { useRestTimer } from '@/hooks/useRestTimer';
 import { ExerciseDatabase } from './ExerciseDatabase';
 import { WorkoutSummary } from './WorkoutSummary';
 import { ExerciseDetail } from './ExerciseDetail';
@@ -32,13 +33,26 @@ export const WorkoutLogger = () => {
   } = useWorkout();
 
   const { convertWeight, convertWeightToStorage, getWeightUnit } = useUnitConversion();
+  const {
+    timeLeft,
+    isRunning,
+    isVisible,
+    isActive,
+    startTimer,
+    pauseTimer,
+    resumeTimer,
+    resetTimer,
+    stopTimer,
+    showTimer,
+    hideTimer,
+    formatTime: formatRestTime
+  } = useRestTimer();
 
   const [workoutName, setWorkoutName] = useState('');
   const [showSummary, setShowSummary] = useState(false);
   const [completedWorkout, setCompletedWorkout] = useState(null);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [showExerciseDetail, setShowExerciseDetail] = useState(false);
-  const [showRestTimer, setShowRestTimer] = useState(false);
 
   const handleStartWorkout = () => {
     const name = workoutName.trim() || 'Workout';
@@ -147,6 +161,17 @@ export const WorkoutLogger = () => {
               </div>
             </div>
             <div className="flex gap-2">
+              {isActive && !isVisible && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={showTimer}
+                  className="flex items-center gap-1"
+                >
+                  <Timer className="h-4 w-4" />
+                  {formatRestTime(timeLeft)}
+                </Button>
+              )}
               <Button variant="outline" size="sm" onClick={handleCancelWorkout}>
                 <X className="h-4 w-4 mr-1" />
                 Cancel
@@ -250,7 +275,7 @@ export const WorkoutLogger = () => {
                               isCompleted: !set.isCompleted 
                             });
                             if (!set.isCompleted) {
-                              setShowRestTimer(true);
+                              startTimer(90);
                             }
                           }}
                         >
@@ -301,9 +326,20 @@ export const WorkoutLogger = () => {
       />
       
       <RestTimer
-        isOpen={showRestTimer}
-        onClose={() => setShowRestTimer(false)}
+        isOpen={isVisible}
+        onClose={hideTimer}
         defaultTime={90}
+        isActive={isActive}
+        timeLeft={timeLeft}
+        isRunning={isRunning}
+        onReopen={showTimer}
+        onPause={pauseTimer}
+        onResume={resumeTimer}
+        onReset={() => resetTimer(90)}
+        onSetTime={(seconds) => {
+          resetTimer(seconds);
+          startTimer(seconds);
+        }}
       />
     </div>
   );
