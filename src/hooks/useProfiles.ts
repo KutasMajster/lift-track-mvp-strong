@@ -26,13 +26,28 @@ export const useProfiles = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [activeProfile, setActiveProfile] = useState<UserProfile | null>(() => {
-    const savedActiveId = localStorage.getItem(ACTIVE_PROFILE_STORAGE_KEY);
-    if (savedActiveId && profiles.length > 0) {
-      return profiles.find(p => p.id === savedActiveId) || profiles[0];
+  const [activeProfile, setActiveProfile] = useState<UserProfile | null>(null);
+
+  // Initialize active profile when profiles are loaded
+  useEffect(() => {
+    if (profiles.length > 0 && !activeProfile) {
+      const savedActiveId = localStorage.getItem(ACTIVE_PROFILE_STORAGE_KEY);
+      const profile = savedActiveId 
+        ? profiles.find(p => p.id === savedActiveId) || profiles[0]
+        : profiles[0];
+      setActiveProfile(profile);
     }
-    return profiles[0] || null;
-  });
+  }, [profiles, activeProfile]);
+
+  // Ensure active profile is always in sync with profiles array changes
+  useEffect(() => {
+    if (activeProfile && profiles.length > 0) {
+      const updatedProfile = profiles.find(p => p.id === activeProfile.id);
+      if (updatedProfile && JSON.stringify(updatedProfile) !== JSON.stringify(activeProfile)) {
+        setActiveProfile(updatedProfile);
+      }
+    }
+  }, [profiles, activeProfile]);
 
   // Persist profiles to localStorage
   useEffect(() => {

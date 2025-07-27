@@ -83,6 +83,11 @@ export const useRestTimer = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const skipTimer = () => {
+    setTimeLeft(0);
+    setIsRunning(false);
+  };
+
   const isActive = timeLeft > 0 || isRunning;
 
   return {
@@ -97,6 +102,7 @@ export const useRestTimer = () => {
     stopTimer,
     showTimer,
     hideTimer,
+    skipTimer,
     formatTime
   };
 };

@@ -16,9 +16,10 @@ interface RestTimerProps {
   onResume: () => void;
   onReset: () => void;
   onSetTime: (seconds: number) => void;
+  onSkip: () => void;
 }
 
-export const RestTimer = ({ isOpen, onClose, defaultTime = 90, isActive, timeLeft, isRunning, onReopen, onPause, onResume, onReset, onSetTime }: RestTimerProps) => {
+export const RestTimer = ({ isOpen, onClose, defaultTime = 90, isActive, timeLeft, isRunning, onReopen, onPause, onResume, onReset, onSetTime, onSkip }: RestTimerProps) => {
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -47,8 +48,8 @@ export const RestTimer = ({ isOpen, onClose, defaultTime = 90, isActive, timeLef
                 className="w-full h-full rounded-full [&>div]:rounded-full"
               />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-4xl font-bold">
+                <div className="text-center bg-background/80 backdrop-blur-sm rounded-full p-4 border">
+                  <div className="text-4xl font-bold text-foreground">
                     {formatTime(timeLeft)}
                   </div>
                   <div className="text-sm text-muted-foreground">
@@ -121,6 +122,14 @@ export const RestTimer = ({ isOpen, onClose, defaultTime = 90, isActive, timeLef
             >
               <RotateCcw className="h-4 w-4 mr-2" />
               Reset
+            </Button>
+
+            <Button
+              variant="secondary"
+              onClick={onSkip}
+              disabled={timeLeft === 0}
+            >
+              Skip Rest
             </Button>
           </div>
 

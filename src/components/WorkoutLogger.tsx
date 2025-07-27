@@ -45,6 +45,7 @@ export const WorkoutLogger = () => {
     stopTimer,
     showTimer,
     hideTimer,
+    skipTimer,
     formatTime: formatRestTime
   } = useRestTimer();
 
@@ -340,6 +341,7 @@ export const WorkoutLogger = () => {
           resetTimer(seconds);
           startTimer(seconds);
         }}
+        onSkip={skipTimer}
       />
     </div>
   );
