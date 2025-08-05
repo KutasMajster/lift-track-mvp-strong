@@ -137,5 +137,89 @@ export const EXERCISES: Exercise[] = [
     equipment: [Equipment.BODYWEIGHT],
     muscleGroups: [MuscleGroup.TRICEPS],
     instructions: 'Support body on parallel bars or bench edge. Lower body by bending elbows, push back up using triceps.'
+  },
+
+  // Core
+  {
+    id: 'plank',
+    name: 'Plank',
+    category: ExerciseCategory.CORE,
+    equipment: [Equipment.BODYWEIGHT],
+    muscleGroups: [MuscleGroup.CORE],
+    instructions: 'Hold forearm plank position, keep body straight from head to heels, engage core throughout.'
+  },
+  {
+    id: 'crunches',
+    name: 'Crunches',
+    category: ExerciseCategory.CORE,
+    equipment: [Equipment.BODYWEIGHT],
+    muscleGroups: [MuscleGroup.CORE],
+    instructions: 'Lie on back, knees bent, hands behind head. Lift shoulders off ground using core muscles, avoid pulling on neck.'
+  },
+  {
+    id: 'bicycle-crunches',
+    name: 'Bicycle Crunches',
+    category: ExerciseCategory.CORE,
+    equipment: [Equipment.BODYWEIGHT],
+    muscleGroups: [MuscleGroup.CORE],
+    instructions: 'Lie on back, hands behind head. Alternate bringing knee to opposite elbow in cycling motion.'
+  },
+  {
+    id: 'mountain-climbers',
+    name: 'Mountain Climbers',
+    category: ExerciseCategory.CORE,
+    equipment: [Equipment.BODYWEIGHT],
+    muscleGroups: [MuscleGroup.CORE],
+    instructions: 'Start in plank position. Rapidly alternate bringing knees to chest in running motion, keep core tight.'
+  },
+  {
+    id: 'russian-twists',
+    name: 'Russian Twists',
+    category: ExerciseCategory.CORE,
+    equipment: [Equipment.BODYWEIGHT],
+    muscleGroups: [MuscleGroup.CORE],
+    instructions: 'Sit with knees bent, lean back slightly. Rotate torso side to side while keeping core engaged.'
+  },
+
+  // Cardio
+  {
+    id: 'running',
+    name: 'Running',
+    category: ExerciseCategory.CARDIO,
+    equipment: [Equipment.BODYWEIGHT],
+    muscleGroups: [MuscleGroup.QUADRICEPS, MuscleGroup.HAMSTRINGS, MuscleGroup.CALVES],
+    instructions: 'Maintain steady pace, land on midfoot, keep upright posture. Track time and distance.'
+  },
+  {
+    id: 'cycling',
+    name: 'Cycling',
+    category: ExerciseCategory.CARDIO,
+    equipment: [Equipment.MACHINE],
+    muscleGroups: [MuscleGroup.QUADRICEPS, MuscleGroup.HAMSTRINGS, MuscleGroup.CALVES],
+    instructions: 'Maintain steady cadence, adjust resistance as needed. Track time, distance, and intensity.'
+  },
+  {
+    id: 'jump-rope',
+    name: 'Jump Rope',
+    category: ExerciseCategory.CARDIO,
+    equipment: [Equipment.BODYWEIGHT],
+    muscleGroups: [MuscleGroup.CALVES, MuscleGroup.SHOULDERS],
+    instructions: 'Jump with minimal knee bend, land on balls of feet. Maintain rhythm and track duration.'
+  },
+  {
+    id: 'burpees',
+    name: 'Burpees',
+    category: ExerciseCategory.CARDIO,
+    equipment: [Equipment.BODYWEIGHT],
+    muscleGroups: [MuscleGroup.CHEST, MuscleGroup.CORE, MuscleGroup.QUADRICEPS],
+    instructions: 'Drop to squat, kick back to plank, do push-up, jump feet back, explosive jump up. Count reps and time.'
+  },
+  {
+    id: 'high-knees',
+    name: 'High Knees',
+    category: ExerciseCategory.CARDIO,
+    equipment: [Equipment.BODYWEIGHT],
+    muscleGroups: [MuscleGroup.QUADRICEPS, MuscleGroup.CORE],
+    instructions: 'Run in place bringing knees to waist level. Maintain quick tempo and track duration.'
   }
 ];

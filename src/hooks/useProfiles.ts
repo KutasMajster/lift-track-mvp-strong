@@ -6,7 +6,7 @@ export interface UserProfile {
   avatar: string;
   createdAt: Date;
   settings: {
-    theme: 'light' | 'dark' | 'system';
+    theme: 'light' | 'dark';
     weightUnit: 'lbs' | 'kg';
     measurementUnit: 'imperial' | 'metric';
   };
@@ -68,7 +68,7 @@ export const useProfiles = () => {
       avatar,
       createdAt: new Date(),
       settings: {
-        theme: 'system',
+        theme: 'light',
         weightUnit: 'lbs',
         measurementUnit: 'imperial'
       }

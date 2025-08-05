@@ -21,7 +21,7 @@ export const ProfileSettings = () => {
     );
   }
 
-  const handleThemeChange = (theme: 'light' | 'dark' | 'system') => {
+  const handleThemeChange = (theme: 'light' | 'dark') => {
     setTheme(theme); // Apply theme immediately first
     updateSettings({ theme }); // Then update profile settings
     toast({
@@ -97,11 +97,10 @@ export const ProfileSettings = () => {
               <SelectContent>
                 <SelectItem value="light">Light</SelectItem>
                 <SelectItem value="dark">Dark</SelectItem>
-                <SelectItem value="system">System</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Choose your preferred theme or sync with system settings
+              Choose your preferred color theme
             </p>
           </div>
         </CardContent>

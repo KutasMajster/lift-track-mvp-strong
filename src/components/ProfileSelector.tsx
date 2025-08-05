@@ -8,6 +8,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Plus, User, Edit, Trash2, Check } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { DeleteConfirmDialog } from '@/components/DeleteConfirmDialog';
+import { ProfileEditDialog } from '@/components/ProfileEditDialog';
 
 interface ProfileSelectorProps {
   isOpen: boolean;
@@ -21,12 +23,17 @@ export const ProfileSelector = ({ isOpen, onClose }: ProfileSelectorProps) => {
     createProfile, 
     switchProfile, 
     deleteProfile,
+    updateProfile,
     defaultAvatars 
   } = useProfiles();
   
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newProfileName, setNewProfileName] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState(defaultAvatars[0]);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [profileToDelete, setProfileToDelete] = useState<string | null>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [profileToEdit, setProfileToEdit] = useState<any>(null);
 
   const handleCreateProfile = () => {
     if (!newProfileName.trim()) {
@@ -63,21 +70,35 @@ export const ProfileSelector = ({ isOpen, onClose }: ProfileSelectorProps) => {
     }
   };
 
-  const handleDeleteProfile = (profileId: string) => {
-    const profile = profiles.find(p => p.id === profileId);
-    if (profile && profiles.length > 1) {
-      deleteProfile(profileId);
-      toast({
-        title: "Profile Deleted",
-        description: `${profile.name}'s profile has been deleted.`
-      });
-    } else {
+  const handleDeleteClick = (profileId: string) => {
+    if (profiles.length <= 1) {
       toast({
         title: "Cannot Delete",
         description: "You need at least one profile.",
         variant: "destructive"
       });
+      return;
     }
+    setProfileToDelete(profileId);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (profileToDelete) {
+      const profile = profiles.find(p => p.id === profileToDelete);
+      deleteProfile(profileToDelete);
+      toast({
+        title: "Profile Deleted",
+        description: `${profile?.name}'s profile has been deleted.`
+      });
+      setShowDeleteDialog(false);
+      setProfileToDelete(null);
+    }
+  };
+
+  const handleEditClick = (profile: any) => {
+    setProfileToEdit(profile);
+    setShowEditDialog(true);
   };
 
   return (
@@ -111,19 +132,32 @@ export const ProfileSelector = ({ isOpen, onClose }: ProfileSelectorProps) => {
                     <Avatar className="h-12 w-12 text-2xl mx-auto">
                       <AvatarFallback>{profile.avatar}</AvatarFallback>
                     </Avatar>
-                    {profiles.length > 1 && (
+                    <div className="flex gap-1">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDeleteProfile(profile.id);
+                          handleEditClick(profile);
                         }}
-                        className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                        className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
                       >
-                        <Trash2 className="h-3 w-3" />
+                        <Edit className="h-3 w-3" />
                       </Button>
-                    )}
+                      {profiles.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteClick(profile.id);
+                          }}
+                          className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   <p className="font-medium text-sm truncate">{profile.name}</p>
                   {activeProfile?.id === profile.id && (
@@ -204,6 +238,30 @@ export const ProfileSelector = ({ isOpen, onClose }: ProfileSelectorProps) => {
           )}
         </div>
       </DialogContent>
+
+      <DeleteConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => {
+          setShowDeleteDialog(false);
+          setProfileToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Profile"
+        description="Are you sure you want to delete this profile? This action cannot be undone and all associated data will be lost."
+      />
+
+      {profileToEdit && (
+        <ProfileEditDialog
+          isOpen={showEditDialog}
+          onClose={() => {
+            setShowEditDialog(false);
+            setProfileToEdit(null);
+          }}
+          profile={profileToEdit}
+          onSave={updateProfile}
+          defaultAvatars={defaultAvatars}
+        />
+      )}
     </Dialog>
   );
 };
