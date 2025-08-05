@@ -7,12 +7,12 @@ import { Templates } from '@/components/Templates';
 import { Measurements } from '@/components/Measurements';
 import { ProfileSettings } from '@/components/ProfileSettings';
 import { ProfileSelector } from '@/components/ProfileSelector';
+import { GlobalProfileButton } from '@/components/GlobalProfileButton';
+import { RefreshNotificationDialog } from '@/components/RefreshNotificationDialog';
 import { BottomNavigation } from '@/components/BottomNavigation';
 import { useWorkout } from '@/hooks/useWorkout';
 import { useProfiles } from '@/hooks/useProfiles';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { User } from 'lucide-react';
+import { useRefreshNotification } from '@/hooks/useRefreshNotification';
 import { useTheme } from 'next-themes';
 
 const Index = () => {
@@ -20,6 +20,7 @@ const Index = () => {
   const { workoutHistory, workoutTemplates } = useWorkout();
   const { activeProfile, profiles } = useProfiles();
   const { setTheme } = useTheme();
+  const { showRefreshDialog, showRefreshNotification, hideRefreshNotification, refreshApp } = useRefreshNotification();
   const [showProfileSelector, setShowProfileSelector] = useState(!activeProfile || profiles.length === 0);
 
   // Apply theme when profile changes
@@ -39,11 +40,11 @@ const Index = () => {
               <p className="text-muted-foreground">Your personal workout companion</p>
             </div>
             <UserStats workoutHistory={workoutHistory} />
-            <Templates workoutTemplates={workoutTemplates} />
+            <Templates workoutTemplates={workoutTemplates} onDataChange={showRefreshNotification} />
           </div>
         );
       case 'workout':
-        return <WorkoutLogger />;
+        return <WorkoutLogger onDataChange={showRefreshNotification} />;
       case 'history':
         return <WorkoutHistory />;
       case 'measure':
@@ -59,25 +60,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
+      <GlobalProfileButton onClick={() => setShowProfileSelector(true)} />
       <div className="container mx-auto px-4 py-6">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h1 className="text-3xl font-bold">Iron Gains</h1>
-              {activeProfile && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowProfileSelector(true)}
-                  className="flex items-center gap-2"
-                >
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback>{activeProfile.avatar}</AvatarFallback>
-                  </Avatar>
-                  <span className="hidden sm:inline">{activeProfile.name}</span>
-                </Button>
-              )}
-            </div>
+            <h1 className="text-3xl font-bold mb-4">Iron Gains</h1>
             <p className="text-muted-foreground">Your personal workout companion</p>
           </div>
           {renderContent()}
@@ -87,6 +74,11 @@ const Index = () => {
       <ProfileSelector 
         isOpen={showProfileSelector} 
         onClose={() => setShowProfileSelector(false)} 
+      />
+      <RefreshNotificationDialog
+        isOpen={showRefreshDialog}
+        onClose={hideRefreshNotification}
+        onRefresh={refreshApp}
       />
     </div>
   );

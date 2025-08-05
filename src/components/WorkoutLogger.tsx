@@ -14,9 +14,13 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Play, Square, Plus, Check, X, Trash2, Timer } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { Exercise } from '@/types/exercise';
+import { Exercise, ExerciseCategory } from '@/types/exercise';
 
-export const WorkoutLogger = () => {
+interface WorkoutLoggerProps {
+  onDataChange?: () => void;
+}
+
+export const WorkoutLogger = ({ onDataChange }: WorkoutLoggerProps) => {
   const {
     currentWorkout,
     workoutTimer,
@@ -70,6 +74,7 @@ export const WorkoutLogger = () => {
     if (completed) {
       setCompletedWorkout(completed);
       setShowSummary(true);
+      onDataChange?.();
     }
     toast({
       title: "Workout Completed!",
@@ -88,6 +93,7 @@ export const WorkoutLogger = () => {
   const handleSaveAsTemplate = () => {
     if (completedWorkout) {
       const template = saveAsTemplate(completedWorkout);
+      onDataChange?.();
       toast({
         title: "Template Saved!",
         description: `"${template.name}" has been saved as a template.`
@@ -231,41 +237,79 @@ export const WorkoutLogger = () => {
                     <div key={set.id} className="flex items-center gap-3">
                       <span className="text-sm font-medium w-8">{index + 1}</span>
                       <div className="flex-1 flex gap-2">
-                        <Input
-                          type="number"
-                          placeholder="Weight"
-                          value={set.weight ? convertWeight(set.weight).value : ''}
-                          min="0"
-                          step="0.5"
-                          onChange={(e) => {
-                            const value = parseFloat(e.target.value);
-                            if (value >= 0) {
-                              const weightForStorage = convertWeightToStorage(value);
-                              updateSet(workoutExercise.id, set.id, { 
-                                weight: weightForStorage 
-                              });
-                            } else {
-                              updateSet(workoutExercise.id, set.id, { 
-                                weight: 0 
-                              });
-                            }
-                          }}
-                          className="w-20"
-                        />
-                        <span className="self-center text-sm">{getWeightUnit()} ×</span>
-                        <Input
-                          type="number"
-                          placeholder="Reps"
-                          value={set.reps || ''}
-                          min="0"
-                          onChange={(e) => {
-                            const value = parseInt(e.target.value);
-                            updateSet(workoutExercise.id, set.id, { 
-                              reps: value >= 0 ? value : 0 
-                            });
-                          }}
-                          className="w-16"
-                        />
+                        {workoutExercise.exercise.category === ExerciseCategory.CARDIO ? (
+                          // Cardio exercises - duration and distance
+                          <>
+                            <Input
+                              type="number"
+                              placeholder="Duration (min)"
+                              value={set.duration ? Math.floor(set.duration / 60) : ''}
+                              min="0"
+                              onChange={(e) => {
+                                const minutes = parseInt(e.target.value) || 0;
+                                updateSet(workoutExercise.id, set.id, { 
+                                  duration: minutes * 60 
+                                });
+                              }}
+                              className="w-24"
+                            />
+                            <span className="self-center text-sm">min</span>
+                            <Input
+                              type="number"
+                              placeholder="Distance (m)"
+                              value={set.distance || ''}
+                              min="0"
+                              step="100"
+                              onChange={(e) => {
+                                const value = parseFloat(e.target.value) || 0;
+                                updateSet(workoutExercise.id, set.id, { 
+                                  distance: value 
+                                });
+                              }}
+                              className="w-24"
+                            />
+                            <span className="self-center text-sm">m</span>
+                          </>
+                        ) : (
+                          // Regular exercises - weight and reps
+                          <>
+                            <Input
+                              type="number"
+                              placeholder="Weight"
+                              value={set.weight ? convertWeight(set.weight).value : ''}
+                              min="0"
+                              step="0.5"
+                              onChange={(e) => {
+                                const value = parseFloat(e.target.value);
+                                if (value >= 0) {
+                                  const weightForStorage = convertWeightToStorage(value);
+                                  updateSet(workoutExercise.id, set.id, { 
+                                    weight: weightForStorage 
+                                  });
+                                } else {
+                                  updateSet(workoutExercise.id, set.id, { 
+                                    weight: 0 
+                                  });
+                                }
+                              }}
+                              className="w-20"
+                            />
+                            <span className="self-center text-sm">{getWeightUnit()} ×</span>
+                            <Input
+                              type="number"
+                              placeholder="Reps"
+                              value={set.reps || ''}
+                              min="0"
+                              onChange={(e) => {
+                                const value = parseInt(e.target.value);
+                                updateSet(workoutExercise.id, set.id, { 
+                                  reps: value >= 0 ? value : 0 
+                                });
+                              }}
+                              className="w-16"
+                            />
+                          </>
+                        )}
                       </div>
                       <div className="flex gap-1">
                         <Button

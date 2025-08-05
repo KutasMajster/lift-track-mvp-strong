@@ -9,8 +9,10 @@ export interface Exercise {
 
 export interface WorkoutSet {
   id: string;
-  reps: number;
-  weight: number;
+  reps?: number;
+  weight?: number;
+  duration?: number; // For cardio exercises (in seconds)
+  distance?: number; // For cardio exercises (in meters)
   isCompleted: boolean;
   restTime?: number;
 }

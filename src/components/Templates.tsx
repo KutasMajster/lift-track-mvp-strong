@@ -10,9 +10,10 @@ import { TemplateEditor } from './TemplateEditor';
 
 interface TemplatesProps {
   workoutTemplates: WorkoutTemplate[];
+  onDataChange?: () => void;
 }
 
-export const Templates = ({ workoutTemplates }: TemplatesProps) => {
+export const Templates = ({ workoutTemplates, onDataChange }: TemplatesProps) => {
   const { 
     startWorkoutFromTemplate,
     deleteTemplate,
@@ -32,6 +33,7 @@ export const Templates = ({ workoutTemplates }: TemplatesProps) => {
 
   const handleDeleteTemplate = (template: WorkoutTemplate) => {
     deleteTemplate(template.id);
+    onDataChange?.();
     toast({
       title: "Template Deleted",
       description: `"${template.name}" template has been deleted.`
@@ -45,6 +47,7 @@ export const Templates = ({ workoutTemplates }: TemplatesProps) => {
 
   const handleUpdateTemplate = (template: WorkoutTemplate) => {
     updateTemplate(template);
+    onDataChange?.();
     toast({
       title: "Template Updated",
       description: `"${template.name}" has been updated.`
@@ -153,6 +156,7 @@ export const Templates = ({ workoutTemplates }: TemplatesProps) => {
           deleteTemplate(templateId);
           setShowTemplateEditor(false);
           setEditingTemplate(null);
+          onDataChange?.();
           toast({
             title: "Template Deleted",
             description: "Template has been deleted."
