@@ -26,9 +26,19 @@ export const useProfiles = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [activeProfile, setActiveProfile] = useState<UserProfile | null>(null);
+  const [activeProfile, setActiveProfile] = useState<UserProfile | null>(() => {
+    const saved = localStorage.getItem(PROFILES_STORAGE_KEY);
+    const profiles = saved ? JSON.parse(saved) : [];
+    if (profiles.length > 0) {
+      const savedActiveId = localStorage.getItem(ACTIVE_PROFILE_STORAGE_KEY);
+      return savedActiveId 
+        ? profiles.find(p => p.id === savedActiveId) || profiles[0]
+        : profiles[0];
+    }
+    return null;
+  });
 
-  // Initialize active profile when profiles are loaded
+  // Initialize active profile when profiles are loaded (only if no active profile exists)
   useEffect(() => {
     if (profiles.length > 0 && !activeProfile) {
       const savedActiveId = localStorage.getItem(ACTIVE_PROFILE_STORAGE_KEY);
@@ -37,17 +47,24 @@ export const useProfiles = () => {
         : profiles[0];
       setActiveProfile(profile);
     }
-  }, [profiles, activeProfile]);
+  }, [profiles.length]); // Only depend on profiles.length, not activeProfile
 
-  // Ensure active profile is always in sync with profiles array changes
+  // Update active profile when profiles array changes (but only if current active profile was updated)
   useEffect(() => {
     if (activeProfile && profiles.length > 0) {
       const updatedProfile = profiles.find(p => p.id === activeProfile.id);
-      if (updatedProfile && JSON.stringify(updatedProfile) !== JSON.stringify(activeProfile)) {
-        setActiveProfile(updatedProfile);
+      if (updatedProfile) {
+        // Only update if there are actual changes
+        const hasChanges = JSON.stringify(updatedProfile) !== JSON.stringify(activeProfile);
+        if (hasChanges) {
+          setActiveProfile(updatedProfile);
+        }
+      } else {
+        // Active profile was deleted, switch to first available
+        setActiveProfile(profiles[0] || null);
       }
     }
-  }, [profiles, activeProfile]);
+  }, [profiles]); // Remove activeProfile from dependencies to prevent cycles
 
   // Persist profiles to localStorage
   useEffect(() => {
