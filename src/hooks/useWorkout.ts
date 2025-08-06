@@ -11,88 +11,90 @@ const TEMPLATES_STORAGE_KEY = 'iron-gains-workout-templates';
 export const useWorkout = () => {
   const { activeProfile } = useProfiles();
   
-  // Profile-specific storage keys
-  const profileCurrentWorkoutKey = `${WORKOUT_STORAGE_KEY}-${activeProfile?.id || 'default'}`;
-  const profileWorkoutHistoryKey = `${HISTORY_STORAGE_KEY}-${activeProfile?.id || 'default'}`;
-  const profileWorkoutTemplatesKey = `${TEMPLATES_STORAGE_KEY}-${activeProfile?.id || 'default'}`;
-  const profileWorkoutTimerKey = `${TIMER_STORAGE_KEY}-${activeProfile?.id || 'default'}`;
+  // Generate stable storage keys based on active profile
+  const getStorageKeys = () => {
+    const profileId = activeProfile?.id || 'default';
+    return {
+      currentWorkout: `${WORKOUT_STORAGE_KEY}-${profileId}`,
+      history: `${HISTORY_STORAGE_KEY}-${profileId}`,
+      templates: `${TEMPLATES_STORAGE_KEY}-${profileId}`,
+      timer: `${TIMER_STORAGE_KEY}-${profileId}`
+    };
+  };
 
   const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(() => {
-    const saved = localStorage.getItem(profileCurrentWorkoutKey);
+    const keys = getStorageKeys();
+    const saved = localStorage.getItem(keys.currentWorkout);
     return saved ? JSON.parse(saved) : null;
   });
   
   const [workoutHistory, setWorkoutHistory] = useState<Workout[]>(() => {
-    const saved = localStorage.getItem(profileWorkoutHistoryKey);
+    const keys = getStorageKeys();
+    const saved = localStorage.getItem(keys.history);
     return saved ? JSON.parse(saved) : [];
   });
   
   const [workoutTemplates, setWorkoutTemplates] = useState<WorkoutTemplate[]>(() => {
-    const saved = localStorage.getItem(profileWorkoutTemplatesKey);
+    const keys = getStorageKeys();
+    const saved = localStorage.getItem(keys.templates);
     return saved ? JSON.parse(saved) : [];
   });
   
   const [workoutTimer, setWorkoutTimer] = useState<number>(() => {
-    const saved = localStorage.getItem(profileWorkoutTimerKey);
+    const keys = getStorageKeys();
+    const saved = localStorage.getItem(keys.timer);
     return saved ? parseInt(saved) : 0;
   });
 
   // Reload data when active profile changes - force fresh data
   useEffect(() => {
     if (activeProfile?.id) {
-      const saved = localStorage.getItem(profileCurrentWorkoutKey);
+      const keys = getStorageKeys();
+      const saved = localStorage.getItem(keys.currentWorkout);
       setCurrentWorkout(saved ? JSON.parse(saved) : null);
-    }
-  }, [activeProfile?.id]);
-
-  useEffect(() => {
-    if (activeProfile?.id) {
-      const saved = localStorage.getItem(profileWorkoutHistoryKey);
-      setWorkoutHistory(saved ? JSON.parse(saved) : []);
-    }
-  }, [activeProfile?.id]);
-
-  useEffect(() => {
-    if (activeProfile?.id) {
-      const saved = localStorage.getItem(profileWorkoutTemplatesKey);
-      setWorkoutTemplates(saved ? JSON.parse(saved) : []);
-    }
-  }, [activeProfile?.id]);
-
-  useEffect(() => {
-    if (activeProfile?.id) {
-      const saved = localStorage.getItem(profileWorkoutTimerKey);
-      setWorkoutTimer(saved ? parseInt(saved) : 0);
+      
+      const historySaved = localStorage.getItem(keys.history);
+      setWorkoutHistory(historySaved ? JSON.parse(historySaved) : []);
+      
+      const templatesSaved = localStorage.getItem(keys.templates);
+      setWorkoutTemplates(templatesSaved ? JSON.parse(templatesSaved) : []);
+      
+      const timerSaved = localStorage.getItem(keys.timer);
+      setWorkoutTimer(timerSaved ? parseInt(timerSaved) : 0);
     }
   }, [activeProfile?.id]);
 
   // Persist current workout to localStorage
   useEffect(() => {
+    const keys = getStorageKeys();
     if (currentWorkout) {
-      localStorage.setItem(profileCurrentWorkoutKey, JSON.stringify(currentWorkout));
+      localStorage.setItem(keys.currentWorkout, JSON.stringify(currentWorkout));
     } else {
-      localStorage.removeItem(profileCurrentWorkoutKey);
+      localStorage.removeItem(keys.currentWorkout);
     }
-  }, [currentWorkout, profileCurrentWorkoutKey]);
+  }, [currentWorkout, activeProfile?.id]);
 
   // Persist timer to localStorage
   useEffect(() => {
+    const keys = getStorageKeys();
     if (currentWorkout && !currentWorkout.isCompleted) {
-      localStorage.setItem(profileWorkoutTimerKey, workoutTimer.toString());
+      localStorage.setItem(keys.timer, workoutTimer.toString());
     } else {
-      localStorage.removeItem(profileWorkoutTimerKey);
+      localStorage.removeItem(keys.timer);
     }
-  }, [workoutTimer, currentWorkout, profileWorkoutTimerKey]);
+  }, [workoutTimer, currentWorkout, activeProfile?.id]);
 
   // Persist history to localStorage
   useEffect(() => {
-    localStorage.setItem(profileWorkoutHistoryKey, JSON.stringify(workoutHistory));
-  }, [workoutHistory, profileWorkoutHistoryKey]);
+    const keys = getStorageKeys();
+    localStorage.setItem(keys.history, JSON.stringify(workoutHistory));
+  }, [workoutHistory, activeProfile?.id]);
 
   // Persist templates to localStorage
   useEffect(() => {
-    localStorage.setItem(profileWorkoutTemplatesKey, JSON.stringify(workoutTemplates));
-  }, [workoutTemplates, profileWorkoutTemplatesKey]);
+    const keys = getStorageKeys();
+    localStorage.setItem(keys.templates, JSON.stringify(workoutTemplates));
+  }, [workoutTemplates, activeProfile?.id]);
 
   // Timer effect
   useEffect(() => {
