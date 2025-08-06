@@ -16,11 +16,9 @@ import { Play, Square, Plus, Check, X, Trash2, Timer } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Exercise, ExerciseCategory } from '@/types/exercise';
 
-interface WorkoutLoggerProps {
-  onDataChange?: () => void;
-}
+interface WorkoutLoggerProps {}
 
-export const WorkoutLogger = ({ onDataChange }: WorkoutLoggerProps) => {
+export const WorkoutLogger = ({}: WorkoutLoggerProps) => {
   const {
     currentWorkout,
     workoutTimer,
@@ -74,7 +72,6 @@ export const WorkoutLogger = ({ onDataChange }: WorkoutLoggerProps) => {
     if (completed) {
       setCompletedWorkout(completed);
       setShowSummary(true);
-      onDataChange?.();
     }
     toast({
       title: "Workout Completed!",
@@ -93,7 +90,6 @@ export const WorkoutLogger = ({ onDataChange }: WorkoutLoggerProps) => {
   const handleSaveAsTemplate = () => {
     if (completedWorkout) {
       const template = saveAsTemplate(completedWorkout);
-      onDataChange?.();
       toast({
         title: "Template Saved!",
         description: `"${template.name}" has been saved as a template.`

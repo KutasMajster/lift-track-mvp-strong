@@ -8,11 +8,9 @@ import { Measurements } from '@/components/Measurements';
 import { ProfileSettings } from '@/components/ProfileSettings';
 import { ProfileSelector } from '@/components/ProfileSelector';
 import { GlobalProfileButton } from '@/components/GlobalProfileButton';
-import { RefreshNotificationDialog } from '@/components/RefreshNotificationDialog';
 import { BottomNavigation } from '@/components/BottomNavigation';
 import { useWorkout } from '@/hooks/useWorkout';
 import { useProfiles } from '@/hooks/useProfiles';
-import { useRefreshNotification } from '@/hooks/useRefreshNotification';
 import { useTheme } from 'next-themes';
 
 const Index = () => {
@@ -20,15 +18,19 @@ const Index = () => {
   const { workoutHistory, workoutTemplates } = useWorkout();
   const { activeProfile, profiles } = useProfiles();
   const { setTheme } = useTheme();
-  const { showRefreshDialog, showRefreshNotification, hideRefreshNotification, refreshApp } = useRefreshNotification();
-  const [showProfileSelector, setShowProfileSelector] = useState(!activeProfile || profiles.length === 0);
+  const [showProfileSelector, setShowProfileSelector] = useState(false);
 
-  // Apply theme when profile changes
+  // Apply theme when profile changes and handle profile selector visibility
   useEffect(() => {
     if (activeProfile?.settings.theme) {
       setTheme(activeProfile.settings.theme);
     }
-  }, [activeProfile?.settings.theme, setTheme]);
+    
+    // Show profile selector if no active profile or no profiles exist
+    if (!activeProfile || profiles.length === 0) {
+      setShowProfileSelector(true);
+    }
+  }, [activeProfile?.settings.theme, activeProfile, profiles.length, setTheme]);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -40,11 +42,11 @@ const Index = () => {
               <p className="text-muted-foreground">Your personal workout companion</p>
             </div>
             <UserStats workoutHistory={workoutHistory} />
-            <Templates workoutTemplates={workoutTemplates} onDataChange={showRefreshNotification} />
+            <Templates workoutTemplates={workoutTemplates} />
           </div>
         );
       case 'workout':
-        return <WorkoutLogger onDataChange={showRefreshNotification} />;
+        return <WorkoutLogger />;
       case 'history':
         return <WorkoutHistory />;
       case 'measure':
@@ -74,11 +76,6 @@ const Index = () => {
       <ProfileSelector 
         isOpen={showProfileSelector} 
         onClose={() => setShowProfileSelector(false)} 
-      />
-      <RefreshNotificationDialog
-        isOpen={showRefreshDialog}
-        onClose={hideRefreshNotification}
-        onRefresh={refreshApp}
       />
     </div>
   );
