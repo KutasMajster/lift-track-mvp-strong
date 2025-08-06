@@ -19,6 +19,7 @@ const Index = () => {
   const { activeProfile, profiles } = useProfiles();
   const { setTheme } = useTheme();
   const [showProfileSelector, setShowProfileSelector] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Apply theme when profile changes and handle profile selector visibility
   useEffect(() => {
@@ -32,6 +33,11 @@ const Index = () => {
     }
   }, [activeProfile?.settings.theme, activeProfile, profiles.length, setTheme]);
 
+  // Force re-render when workout history changes
+  useEffect(() => {
+    setRefreshKey(prev => prev + 1);
+  }, [workoutHistory.length]);
+
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
@@ -41,7 +47,7 @@ const Index = () => {
               <h2 className="text-2xl font-bold mb-2">Welcome to Iron Gains</h2>
               <p className="text-muted-foreground">Your personal workout companion</p>
             </div>
-            <UserStats workoutHistory={workoutHistory} />
+            <UserStats key={refreshKey} workoutHistory={workoutHistory} />
             <Templates workoutTemplates={workoutTemplates} />
           </div>
         );
