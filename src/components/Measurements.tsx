@@ -204,7 +204,16 @@ export const Measurements = () => {
                               progress.isPositive ? 'text-green-600' : 'text-red-600'
                             }`}>
                               <TrendingUp className="h-3 w-3" />
-                              {progress.isPositive ? '+' : ''}{progress.diff.toFixed(1)} {displayUnit}
+                              {/* Convert progress diff to display units */}
+                              {(() => {
+                                let progressDiff = progress.diff;
+                                if (type.id === 'weight' || type.id === 'muscle_mass') {
+                                  progressDiff = convertWeight(Math.abs(progress.diff)).value * (progress.isPositive ? 1 : -1);
+                                } else if (['chest', 'bicep', 'waist', 'thigh', 'neck', 'forearm'].includes(type.id)) {
+                                  progressDiff = convertLength(Math.abs(progress.diff)).value * (progress.isPositive ? 1 : -1);
+                                }
+                                return `${progress.isPositive ? '+' : ''}${progressDiff.toFixed(1)} ${displayUnit}`;
+                              })()}
                             </div>
                           )}
                           <div className="text-xs text-muted-foreground">

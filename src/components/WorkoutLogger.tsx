@@ -107,6 +107,12 @@ export const WorkoutLogger = ({}: WorkoutLoggerProps) => {
     setCompletedWorkout(null);
   };
 
+  const handleViewHistory = () => {
+    // Navigate to history tab by dispatching an event that the parent can listen to
+    window.dispatchEvent(new CustomEvent('navigateToHistory'));
+    handleCloseSummary();
+  };
+
   if (showSummary && completedWorkout) {
     return (
       <div className="space-y-6">
@@ -115,6 +121,7 @@ export const WorkoutLogger = ({}: WorkoutLoggerProps) => {
           onSaveAsTemplate={handleSaveAsTemplate}
           onStartNewWorkout={handleStartNewWorkout}
           onClose={handleCloseSummary}
+          onViewHistory={handleViewHistory}
         />
       </div>
     );

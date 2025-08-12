@@ -33,6 +33,16 @@ const Index = () => {
     }
   }, [activeProfile?.settings.theme, activeProfile, profiles.length, setTheme]);
 
+  // Listen for navigation events from WorkoutSummary
+  useEffect(() => {
+    const handleNavigateToHistory = () => {
+      setActiveTab('history');
+    };
+
+    window.addEventListener('navigateToHistory', handleNavigateToHistory);
+    return () => window.removeEventListener('navigateToHistory', handleNavigateToHistory);
+  }, []);
+
   // Force re-render when workout history or templates change
   useEffect(() => {
     setRefreshKey(prev => prev + 1);

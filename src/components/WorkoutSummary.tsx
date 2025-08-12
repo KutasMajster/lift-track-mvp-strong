@@ -10,13 +10,15 @@ interface WorkoutSummaryProps {
   onSaveAsTemplate: () => void;
   onStartNewWorkout: () => void;
   onClose: () => void;
+  onViewHistory: () => void;
 }
 
 export const WorkoutSummary = ({ 
   workout, 
   onSaveAsTemplate, 
   onStartNewWorkout,
-  onClose 
+  onClose,
+  onViewHistory 
 }: WorkoutSummaryProps) => {
   const { convertWeight, getWeightUnit } = useUnitConversion();
   
@@ -86,7 +88,7 @@ export const WorkoutSummary = ({
             <RotateCcw className="h-4 w-4 mr-1" />
             Start New Workout
           </Button>
-          <Button onClick={onClose} variant="ghost" className="w-full">
+          <Button onClick={onViewHistory} variant="ghost" className="w-full">
             View History
           </Button>
         </div>
