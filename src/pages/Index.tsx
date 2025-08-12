@@ -33,10 +33,10 @@ const Index = () => {
     }
   }, [activeProfile?.settings.theme, activeProfile, profiles.length, setTheme]);
 
-  // Force re-render when workout history changes
+  // Force re-render when workout history or templates change
   useEffect(() => {
     setRefreshKey(prev => prev + 1);
-  }, [workoutHistory.length]);
+  }, [workoutHistory.length, workoutTemplates.length, workoutTemplates]);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -48,7 +48,7 @@ const Index = () => {
               <p className="text-muted-foreground">Your personal workout companion</p>
             </div>
             <UserStats key={refreshKey} workoutHistory={workoutHistory} />
-            <Templates workoutTemplates={workoutTemplates} />
+            <Templates key={`templates-${refreshKey}`} workoutTemplates={workoutTemplates} />
           </div>
         );
       case 'workout':
