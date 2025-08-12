@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { WorkoutTemplate } from '@/types/exercise';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,11 @@ export const TemplateEditor = ({
 }: TemplateEditorProps) => {
   const [editedTemplate, setEditedTemplate] = useState<WorkoutTemplate | null>(template);
   const [showExerciseSelector, setShowExerciseSelector] = useState(false);
+
+  // Sync editedTemplate with template prop changes
+  useEffect(() => {
+    setEditedTemplate(template);
+  }, [template]);
 
   if (!template || !editedTemplate) return null;
 

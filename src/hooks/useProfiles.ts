@@ -64,7 +64,7 @@ export const useProfiles = () => {
         setActiveProfile(profiles[0] || null);
       }
     }
-  }, [profiles]); // Remove activeProfile from dependencies to prevent cycles
+  }, [profiles, activeProfile?.id]); // Only depend on activeProfile.id, not the full object
 
   // Persist profiles to localStorage
   useEffect(() => {
@@ -109,22 +109,18 @@ export const useProfiles = () => {
           : profile
       )
     );
-
-    // Update active profile if it's the one being updated
-    if (activeProfile?.id === profileId) {
-      setActiveProfile(prev => prev ? { ...prev, ...updates } : null);
-    }
-  }, [activeProfile]);
+  }, []);
 
   const deleteProfile = useCallback((profileId: string) => {
-    setProfiles(prev => prev.filter(p => p.id !== profileId));
-    
-    // If we're deleting the active profile, switch to another one
-    if (activeProfile?.id === profileId) {
-      const remainingProfiles = profiles.filter(p => p.id !== profileId);
-      setActiveProfile(remainingProfiles[0] || null);
-    }
-  }, [activeProfile, profiles]);
+    setProfiles(prev => {
+      const filtered = prev.filter(p => p.id !== profileId);
+      // If we're deleting the active profile, switch to another one
+      if (activeProfile?.id === profileId) {
+        setActiveProfile(filtered[0] || null);
+      }
+      return filtered;
+    });
+  }, [activeProfile?.id]);
 
   const switchProfile = useCallback((profileId: string) => {
     const profile = profiles.find(p => p.id === profileId);
