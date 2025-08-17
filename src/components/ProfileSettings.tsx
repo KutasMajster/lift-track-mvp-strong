@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useProfiles } from '@/hooks/useProfiles';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,12 +48,18 @@ export const ProfileSettings = () => {
     });
   };
 
-  const handleRestTimeChange = (defaultRestTime: number) => {
-    updateSettings({ defaultRestTime });
-    toast({
-      title: "Default Rest Time Updated",
-      description: `Default rest time changed to ${defaultRestTime} seconds`
-    });
+  const [restTimeValue, setRestTimeValue] = useState(activeProfile?.settings.defaultRestTime.toString() || '90');
+
+  const handleRestTimeChange = (value: string) => {
+    setRestTimeValue(value);
+    const numValue = parseInt(value);
+    if (!isNaN(numValue) && numValue >= 30 && numValue <= 600) {
+      updateSettings({ defaultRestTime: numValue });
+      toast({
+        title: "Default Rest Time Updated",
+        description: `Default rest time changed to ${numValue} seconds`
+      });
+    }
   };
 
   return (
@@ -174,13 +181,8 @@ export const ProfileSettings = () => {
               min="30"
               max="600"
               step="15"
-              value={activeProfile.settings.defaultRestTime}
-              onChange={(e) => {
-                const value = parseInt(e.target.value);
-                if (value >= 30 && value <= 600) {
-                  handleRestTimeChange(value);
-                }
-              }}
+              value={restTimeValue}
+              onChange={(e) => handleRestTimeChange(e.target.value)}
             />
             <p className="text-xs text-muted-foreground">
               Time between sets (30-600 seconds)

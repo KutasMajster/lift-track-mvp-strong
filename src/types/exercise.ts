@@ -50,6 +50,12 @@ export interface WorkoutTemplate {
     exerciseId: string;
     exercise: Exercise;
     targetSets: number;
+    lastUsedValues?: {
+      reps: number;
+      weight: number;
+      duration?: number;
+      distance?: number;
+    };
   }[];
   createdFrom?: string; // workout id it was created from
   createdAt: Date;

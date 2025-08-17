@@ -153,8 +153,10 @@ export const useWorkout = () => {
         exercise: templateExercise.exercise,
         sets: Array.from({ length: templateExercise.targetSets }, () => ({
           id: uuidv4(),
-          reps: 0,
-          weight: 0,
+          reps: templateExercise.lastUsedValues?.reps || 0,
+          weight: templateExercise.lastUsedValues?.weight || 0,
+          duration: templateExercise.lastUsedValues?.duration,
+          distance: templateExercise.lastUsedValues?.distance,
           isCompleted: false
         }))
       })),
@@ -284,11 +286,23 @@ export const useWorkout = () => {
     const template: WorkoutTemplate = {
       id: uuidv4(),
       name: `${workout.name} Template`,
-      exercises: workout.exercises.map(ex => ({
-        exerciseId: ex.exerciseId,
-        exercise: ex.exercise,
-        targetSets: ex.sets.length
-      })),
+      exercises: workout.exercises.map(ex => {
+        // Get the last completed set or the last set for values
+        const lastCompletedSet = ex.sets.filter(set => set.isCompleted).pop();
+        const lastSet = lastCompletedSet || ex.sets[ex.sets.length - 1];
+        
+        return {
+          exerciseId: ex.exerciseId,
+          exercise: ex.exercise,
+          targetSets: ex.sets.length,
+          lastUsedValues: lastSet ? {
+            reps: lastSet.reps || 0,
+            weight: lastSet.weight || 0,
+            duration: lastSet.duration,
+            distance: lastSet.distance
+          } : undefined
+        };
+      }),
       createdFrom: workout.id,
       createdAt: new Date()
     };
