@@ -190,10 +190,16 @@ export const useWorkout = () => {
   const addSet = useCallback((exerciseId: string) => {
     if (!currentWorkout) return;
 
+    // Find the exercise and get the last set for auto-fill
+    const exercise = currentWorkout.exercises.find(ex => ex.id === exerciseId);
+    const lastSet = exercise?.sets[exercise.sets.length - 1];
+
     const newSet: WorkoutSet = {
       id: uuidv4(),
-      reps: 0,
-      weight: 0,
+      reps: lastSet?.reps || 0,
+      weight: lastSet?.weight || 0,
+      duration: lastSet?.duration || undefined,
+      distance: lastSet?.distance || undefined,
       isCompleted: false
     };
 

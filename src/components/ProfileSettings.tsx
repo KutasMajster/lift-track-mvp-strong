@@ -2,10 +2,11 @@ import { useProfiles } from '@/hooks/useProfiles';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Settings, Palette, Scale, Ruler } from 'lucide-react';
+import { Settings, Palette, Scale, Timer } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useTheme } from 'next-themes';
 
@@ -43,6 +44,14 @@ export const ProfileSettings = () => {
     toast({
       title: "Measurement Unit Updated",
       description: `Measurement unit changed to ${measurementUnit}`
+    });
+  };
+
+  const handleRestTimeChange = (defaultRestTime: number) => {
+    updateSettings({ defaultRestTime });
+    toast({
+      title: "Default Rest Time Updated",
+      description: `Default rest time changed to ${defaultRestTime} seconds`
     });
   };
 
@@ -145,6 +154,37 @@ export const ProfileSettings = () => {
                 <SelectItem value="metric">Metric (centimeters, meters)</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Workout Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Timer className="h-5 w-5" />
+            Workout Settings
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Default Rest Time (seconds)</Label>
+            <Input
+              type="number"
+              min="30"
+              max="600"
+              step="15"
+              value={activeProfile.settings.defaultRestTime}
+              onChange={(e) => {
+                const value = parseInt(e.target.value);
+                if (value >= 30 && value <= 600) {
+                  handleRestTimeChange(value);
+                }
+              }}
+            />
+            <p className="text-xs text-muted-foreground">
+              Time between sets (30-600 seconds)
+            </p>
           </div>
         </CardContent>
       </Card>

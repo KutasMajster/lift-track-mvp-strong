@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useWorkout } from '@/hooks/useWorkout';
 import { useUnitConversion } from '@/hooks/useUnitConversion';
 import { useRestTimer } from '@/hooks/useRestTimer';
+import { useProfiles } from '@/hooks/useProfiles';
 import { ExerciseDatabase } from './ExerciseDatabase';
 import { WorkoutSummary } from './WorkoutSummary';
 import { ExerciseDetail } from './ExerciseDetail';
@@ -33,6 +34,8 @@ export const WorkoutLogger = ({}: WorkoutLoggerProps) => {
     cancelWorkout,
     saveAsTemplate
   } = useWorkout();
+
+  const { activeProfile } = useProfiles();
 
   const { convertWeight, convertWeightToStorage, getWeightUnit } = useUnitConversion();
   const {
@@ -323,7 +326,8 @@ export const WorkoutLogger = ({}: WorkoutLoggerProps) => {
                               isCompleted: !set.isCompleted 
                             });
                             if (!set.isCompleted) {
-                              startTimer(90);
+                              const defaultRestTime = activeProfile?.settings.defaultRestTime || 90;
+                              startTimer(defaultRestTime);
                             }
                           }}
                         >
@@ -376,14 +380,14 @@ export const WorkoutLogger = ({}: WorkoutLoggerProps) => {
       <RestTimer
         isOpen={isVisible}
         onClose={hideTimer}
-        defaultTime={90}
+        defaultTime={activeProfile?.settings.defaultRestTime || 90}
         isActive={isActive}
         timeLeft={timeLeft}
         isRunning={isRunning}
         onReopen={showTimer}
         onPause={pauseTimer}
         onResume={resumeTimer}
-        onReset={() => resetTimer(90)}
+        onReset={() => resetTimer(activeProfile?.settings.defaultRestTime || 90)}
         onSetTime={(seconds) => {
           resetTimer(seconds);
           startTimer(seconds);

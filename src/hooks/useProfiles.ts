@@ -9,6 +9,7 @@ export interface UserProfile {
     theme: 'light' | 'dark';
     weightUnit: 'lbs' | 'kg';
     measurementUnit: 'imperial' | 'metric';
+    defaultRestTime: number; // in seconds
   };
 }
 
@@ -87,7 +88,8 @@ export const useProfiles = () => {
       settings: {
         theme: 'light',
         weightUnit: 'lbs',
-        measurementUnit: 'imperial'
+        measurementUnit: 'imperial',
+        defaultRestTime: 90
       }
     };
 
