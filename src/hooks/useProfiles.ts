@@ -1,4 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from '@/hooks/use-toast';
 
 export interface UserProfile {
   id: string;
@@ -6,15 +10,12 @@ export interface UserProfile {
   avatar: string;
   createdAt: Date;
   settings: {
-    theme: 'light' | 'dark';
+    theme: 'light' | 'dark' | 'system';
     weightUnit: 'lbs' | 'kg';
     measurementUnit: 'imperial' | 'metric';
     defaultRestTime: number; // in seconds
   };
 }
-
-const PROFILES_STORAGE_KEY = 'iron-gains-profiles';
-const ACTIVE_PROFILE_STORAGE_KEY = 'iron-gains-active-profile';
 
 const DEFAULT_AVATARS = [
   '💪', '🔥', '⚡', '🏋️', '🎯', '🦁', '🐺', '🦅',
@@ -22,125 +23,176 @@ const DEFAULT_AVATARS = [
 ];
 
 export const useProfiles = () => {
-  const [profiles, setProfiles] = useState<UserProfile[]>(() => {
-    const saved = localStorage.getItem(PROFILES_STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const { user } = useAuth();
+  const [profiles, setProfiles] = useState<UserProfile[]>([]);
+  const [activeProfile, setActiveProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const [activeProfile, setActiveProfile] = useState<UserProfile | null>(() => {
-    const saved = localStorage.getItem(PROFILES_STORAGE_KEY);
-    const profiles = saved ? JSON.parse(saved) : [];
-    if (profiles.length > 0) {
-      const savedActiveId = localStorage.getItem(ACTIVE_PROFILE_STORAGE_KEY);
-      return savedActiveId 
-        ? profiles.find(p => p.id === savedActiveId) || profiles[0]
-        : profiles[0];
-    }
-    return null;
-  });
+  // Fetch user profile from Supabase
+  const fetchProfile = async () => {
+    if (!user) return;
 
-  // Initialize active profile when profiles are loaded (only if no active profile exists)
-  useEffect(() => {
-    if (profiles.length > 0 && !activeProfile) {
-      const savedActiveId = localStorage.getItem(ACTIVE_PROFILE_STORAGE_KEY);
-      const profile = savedActiveId 
-        ? profiles.find(p => p.id === savedActiveId) || profiles[0]
-        : profiles[0];
-      setActiveProfile(profile);
-    }
-  }, [profiles.length]); // Only depend on profiles.length, not activeProfile
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
 
-  // Update active profile when profiles array changes (but only if current active profile was updated)
-  useEffect(() => {
-    if (activeProfile && profiles.length > 0) {
-      const updatedProfile = profiles.find(p => p.id === activeProfile.id);
-      if (updatedProfile) {
-        // Only update if there are actual changes
-        const hasChanges = JSON.stringify(updatedProfile) !== JSON.stringify(activeProfile);
-        if (hasChanges) {
-          setActiveProfile(updatedProfile);
+      if (error) {
+        // If no profile exists, create one
+        if (error.code === 'PGRST116') {
+          await createInitialProfile();
+        } else {
+          throw error;
         }
-      } else {
-        // Active profile was deleted, switch to first available
-        setActiveProfile(profiles[0] || null);
+        return;
       }
-    }
-  }, [profiles, activeProfile?.id]); // Only depend on activeProfile.id, not the full object
 
-  // Persist profiles to localStorage
+      // Convert Supabase profile to UserProfile format
+      const settings = data.settings as any;
+      const userProfile: UserProfile = {
+        id: data.id,
+        name: data.name,
+        avatar: data.avatar || 'default',
+        createdAt: new Date(data.created_at),
+        settings: {
+          theme: settings?.theme || 'system',
+          weightUnit: settings?.weightUnit || 'kg',
+          measurementUnit: settings?.measurementUnit || 'metric',
+          defaultRestTime: settings?.defaultRestTime || 90
+        }
+      };
+
+      setProfiles([userProfile]);
+      setActiveProfile(userProfile);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      toast({
+        title: "Error Loading Profile",
+        description: "Could not load your profile. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Create initial profile for new users
+  const createInitialProfile = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          name: user.user_metadata?.name || 'User',
+          avatar: 'default'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const settings = data.settings as any;
+      const userProfile: UserProfile = {
+        id: data.id,
+        name: data.name,
+        avatar: data.avatar || 'default',
+        createdAt: new Date(data.created_at),
+        settings: {
+          theme: settings?.theme || 'system',
+          weightUnit: settings?.weightUnit || 'kg',
+          measurementUnit: settings?.measurementUnit || 'metric',
+          defaultRestTime: settings?.defaultRestTime || 90
+        }
+      };
+
+      setProfiles([userProfile]);
+      setActiveProfile(userProfile);
+    } catch (error) {
+      console.error('Error creating profile:', error);
+      toast({
+        title: "Error Creating Profile",
+        description: "Could not create your profile. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Load profile when user changes
   useEffect(() => {
-    localStorage.setItem(PROFILES_STORAGE_KEY, JSON.stringify(profiles));
-  }, [profiles]);
-
-  // Persist active profile to localStorage
-  useEffect(() => {
-    if (activeProfile) {
-      localStorage.setItem(ACTIVE_PROFILE_STORAGE_KEY, activeProfile.id);
+    if (user) {
+      fetchProfile();
+    } else {
+      setProfiles([]);
+      setActiveProfile(null);
+      setLoading(false);
     }
-  }, [activeProfile]);
+  }, [user?.id]);
 
-  const createProfile = useCallback((name: string, avatar: string) => {
-    const newProfile: UserProfile = {
-      id: `profile-${Date.now()}-${Math.random()}`,
-      name,
-      avatar,
-      createdAt: new Date(),
-      settings: {
-        theme: 'light',
-        weightUnit: 'lbs',
-        measurementUnit: 'imperial',
-        defaultRestTime: 90
-      }
-    };
+  const updateSettings = async (settings: Partial<UserProfile['settings']>) => {
+    if (!activeProfile || !user) return;
 
-    setProfiles(prev => [...prev, newProfile]);
-    
-    // If this is the first profile, make it active
-    if (profiles.length === 0) {
-      setActiveProfile(newProfile);
+    try {
+      const updatedSettings = {
+        ...activeProfile.settings,
+        ...settings
+      };
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          settings: updatedSettings
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      const updatedProfile = {
+        ...activeProfile,
+        settings: updatedSettings
+      };
+      
+      setActiveProfile(updatedProfile);
+      setProfiles([updatedProfile]);
+
+      toast({
+        title: "Settings Updated",
+        description: "Your preferences have been saved."
+      });
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      toast({
+        title: "Error Updating Settings", 
+        description: "Could not save your preferences. Please try again.",
+        variant: "destructive"
+      });
     }
-    
-    return newProfile;
-  }, [profiles.length]);
+  };
 
-  const updateProfile = useCallback((profileId: string, updates: Partial<UserProfile>) => {
-    setProfiles(prev => 
-      prev.map(profile => 
-        profile.id === profileId 
-          ? { ...profile, ...updates }
-          : profile
-      )
-    );
-  }, []);
+  // Legacy functions for compatibility (no longer needed in database mode)
+  const createProfile = () => {
+    console.warn('createProfile is deprecated in database mode');
+  };
 
-  const deleteProfile = useCallback((profileId: string) => {
-    setProfiles(prev => {
-      const filtered = prev.filter(p => p.id !== profileId);
-      // If we're deleting the active profile, switch to another one
-      if (activeProfile?.id === profileId) {
-        setActiveProfile(filtered[0] || null);
-      }
-      return filtered;
-    });
-  }, [activeProfile?.id]);
+  const updateProfile = () => {
+    console.warn('updateProfile is deprecated in database mode');
+  };
 
-  const switchProfile = useCallback((profileId: string) => {
-    const profile = profiles.find(p => p.id === profileId);
-    if (profile) {
-      setActiveProfile(profile);
-    }
-  }, [profiles]);
+  const deleteProfile = () => {
+    console.warn('deleteProfile is deprecated in database mode');
+  };
 
-  const updateSettings = useCallback((settings: Partial<UserProfile['settings']>) => {
-    if (!activeProfile) return;
-    
-    const updatedSettings = { ...activeProfile.settings, ...settings };
-    updateProfile(activeProfile.id, { settings: updatedSettings });
-  }, [activeProfile, updateProfile]);
+  const switchProfile = () => {
+    console.warn('switchProfile is deprecated in database mode');
+  };
 
   return {
     profiles,
     activeProfile,
+    loading,
     createProfile,
     updateProfile,
     deleteProfile,

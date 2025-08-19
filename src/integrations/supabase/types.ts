@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      measurement_entries: {
+        Row: {
+          created_at: string | null
+          date: string
+          id: string
+          notes: string | null
+          profile_id: string
+          type: string
+          unit: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          notes?: string | null
+          profile_id?: string
+          type: string
+          unit: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          notes?: string | null
+          profile_id?: string
+          type?: string
+          unit?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: []
+      }
       measurements: {
         Row: {
           biceps: number | null
@@ -209,6 +245,7 @@ export type Database = {
           created_from: string | null
           id: string
           name: string
+          profile_id: string
           user_id: string
         }
         Insert: {
@@ -216,6 +253,7 @@ export type Database = {
           created_from?: string | null
           id?: string
           name: string
+          profile_id?: string
           user_id: string
         }
         Update: {
@@ -223,6 +261,7 @@ export type Database = {
           created_from?: string | null
           id?: string
           name?: string
+          profile_id?: string
           user_id?: string
         }
         Relationships: []
@@ -235,6 +274,7 @@ export type Database = {
           id: string
           is_completed: boolean | null
           name: string
+          profile_id: string
           summary: Json | null
           user_id: string
         }
@@ -245,6 +285,7 @@ export type Database = {
           id?: string
           is_completed?: boolean | null
           name: string
+          profile_id?: string
           summary?: Json | null
           user_id: string
         }
@@ -255,6 +296,7 @@ export type Database = {
           id?: string
           is_completed?: boolean | null
           name?: string
+          profile_id?: string
           summary?: Json | null
           user_id?: string
         }

@@ -1,7 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
-import { Workout, WorkoutExercise, WorkoutSet, WorkoutTemplate, WorkoutSummary } from '@/types/exercise';
-import { useProfiles } from './useProfiles';
-import { v4 as uuidv4 } from 'uuid';
+// Re-export Supabase workout hook as the main useWorkout hook
+export { useSupabaseWorkout as useWorkout } from './useSupabaseWorkout';
 
 const WORKOUT_STORAGE_KEY = 'iron-gains-current-workout';
 const TIMER_STORAGE_KEY = 'iron-gains-workout-timer';

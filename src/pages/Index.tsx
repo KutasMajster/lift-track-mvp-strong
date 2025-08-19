@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { WorkoutLogger } from '@/components/WorkoutLogger';
 import { WorkoutHistory } from '@/components/WorkoutHistory';
 import { ExerciseLibrary } from '@/components/ExerciseLibrary';
@@ -11,15 +12,25 @@ import { GlobalProfileButton } from '@/components/GlobalProfileButton';
 import { BottomNavigation } from '@/components/BottomNavigation';
 import { useWorkout } from '@/hooks/useWorkout';
 import { useProfiles } from '@/hooks/useProfiles';
+import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from 'next-themes';
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('workout');
   const { workoutHistory, workoutTemplates } = useWorkout();
   const { activeProfile, profiles } = useProfiles();
   const { setTheme } = useTheme();
   const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  // Redirect to auth if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth');
+    }
+  }, [user, loading, navigate]);
 
   // Apply theme when profile changes and handle profile selector visibility
   useEffect(() => {
@@ -75,6 +86,20 @@ const Index = () => {
         return <WorkoutLogger />;
     }
   };
+
+  // Show loading spinner while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Don't render anything if not authenticated (will redirect)
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">

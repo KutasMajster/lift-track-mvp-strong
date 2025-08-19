@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,15 +10,10 @@ import { Ruler, Plus, TrendingUp, Calendar } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useProfiles } from '@/hooks/useProfiles';
 import { useUnitConversion } from '@/hooks/useUnitConversion';
+import { useMeasurements, MeasurementEntry } from '@/hooks/useMeasurements';
 
-export interface Measurement {
-  id: string;
-  type: string;
-  value: number;
-  unit: string;
-  date: Date;
-  notes?: string;
-}
+// Use MeasurementEntry from the hook instead
+type Measurement = MeasurementEntry;
 
 export interface MeasurementType {
   id: string;
@@ -39,17 +34,10 @@ const getMeasurementTypes = (getWeightUnit: () => string, getLengthUnit: () => s
   { id: 'forearm', name: 'Forearm', unit: getLengthUnit(), category: 'body' }
 ];
 
-const MEASUREMENTS_STORAGE_KEY = 'iron-gains-measurements';
-
 export const Measurements = () => {
   const { activeProfile } = useProfiles();
   const { convertWeight, convertLength, convertWeightToStorage, convertLengthToStorage, getWeightUnit, getLengthUnit } = useUnitConversion();
-  const profileMeasurementsKey = `${MEASUREMENTS_STORAGE_KEY}-${activeProfile?.id || 'default'}`;
-  
-  const [measurements, setMeasurements] = useState<Measurement[]>(() => {
-    const saved = localStorage.getItem(profileMeasurementsKey);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const { measurements, loading, addMeasurement, getLatestMeasurement, getMeasurementHistory } = useMeasurements();
 
   const MEASUREMENT_TYPES = getMeasurementTypes(getWeightUnit, getLengthUnit);
   
@@ -57,20 +45,7 @@ export const Measurements = () => {
   const [value, setValue] = useState('');
   const [notes, setNotes] = useState('');
 
-  // Reload measurements when profile changes - force fresh data
-  useEffect(() => {
-    if (activeProfile?.id) {
-      const saved = localStorage.getItem(profileMeasurementsKey);
-      setMeasurements(saved ? JSON.parse(saved) : []);
-    }
-  }, [activeProfile?.id]);
-
-  // Persist measurements to localStorage
-  useEffect(() => {
-    localStorage.setItem(profileMeasurementsKey, JSON.stringify(measurements));
-  }, [measurements, profileMeasurementsKey]);
-
-  const handleAddMeasurement = () => {
+  const handleAddMeasurement = async () => {
     if (!value || parseFloat(value) <= 0) {
       toast({
         title: "Invalid Value",
@@ -92,8 +67,7 @@ export const Measurements = () => {
       storageUnit = 'in'; // Always store lengths in inches
     }
 
-    const measurement: Measurement = {
-      id: `${Date.now()}-${Math.random()}`,
+    const measurement: Omit<MeasurementEntry, 'id'> = {
       type: selectedType.id,
       value: storageValue,
       unit: storageUnit,
@@ -101,27 +75,20 @@ export const Measurements = () => {
       notes: notes.trim() || undefined
     };
 
-    setMeasurements(prev => [measurement, ...prev]);
-    setValue('');
-    setNotes('');
+    const result = await addMeasurement(measurement);
     
-    toast({
-      title: "Measurement Added!",
-      description: `${selectedType.name}: ${value} ${selectedType.unit}`
-    });
+    if (result) {
+      setValue('');
+      setNotes('');
+      
+      toast({
+        title: "Measurement Added!",
+        description: `${selectedType.name}: ${value} ${selectedType.unit}`
+      });
+    }
   };
 
-  const getLatestMeasurement = (type: string) => {
-    return measurements
-      .filter(m => m.type === type)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
-  };
-
-  const getMeasurementHistory = (type: string) => {
-    return measurements
-      .filter(m => m.type === type)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  };
+  // These functions are now provided by the useMeasurements hook
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('en-US', {
@@ -288,7 +255,14 @@ export const Measurements = () => {
         </TabsContent>
 
         <TabsContent value="history" className="space-y-4">
-          {measurements.length === 0 ? (
+          {loading ? (
+            <Card>
+              <CardContent className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Loading measurements...</p>
+              </CardContent>
+            </Card>
+          ) : measurements.length === 0 ? (
             <Card>
               <CardContent className="text-center py-8">
                 <Ruler className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
