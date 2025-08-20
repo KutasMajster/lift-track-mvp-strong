@@ -18,12 +18,14 @@ export const WorkoutHistory = () => {
   
   const [expandedWorkout, setExpandedWorkout] = useState<string | null>(null);
 
-  const handleSaveAsTemplate = (workout: Workout) => {
-    const template = saveAsTemplate(workout);
-    toast({
-      title: "Template Saved!",
-      description: `"${template.name}" has been saved as a template.`
-    });
+  const handleSaveAsTemplate = async (workout: Workout) => {
+    const template = await saveAsTemplate(workout);
+    if (template) {
+      toast({
+        title: "Template Saved!",
+        description: `"${template.name}" has been saved as a template.`
+      });
+    }
   };
 
   const formatDate = (date: Date) => {

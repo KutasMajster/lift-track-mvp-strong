@@ -43,7 +43,7 @@ export const useSupabaseWorkout = () => {
         date: new Date(workout.date),
         duration: workout.duration,
         isCompleted: workout.is_completed,
-        summary: workout.summary,
+        summary: workout.summary ? (workout.summary as unknown as WorkoutSummary) : undefined,
         exercises: workout.workout_exercises.map((exercise: any, index: number) => ({
           id: exercise.id,
           exerciseId: exercise.exercise_id,
@@ -315,7 +315,7 @@ export const useSupabaseWorkout = () => {
           date: completedWorkout.date.toISOString(),
           duration: completedWorkout.duration,
           is_completed: true,
-          summary: completedWorkout.summary
+          summary: completedWorkout.summary as any
         })
         .select()
         .single();
@@ -330,7 +330,7 @@ export const useSupabaseWorkout = () => {
             id: exercise.id,
             workout_id: completedWorkout.id,
             exercise_id: exercise.exerciseId,
-            exercise_data: exercise.exercise,
+            exercise_data: exercise.exercise as any,
             order_index: exerciseIndex
           })
           .select()
@@ -431,9 +431,9 @@ export const useSupabaseWorkout = () => {
           .insert({
             template_id: template.id,
             exercise_id: exercise.exerciseId,
-            exercise_data: exercise.exercise,
+            exercise_data: exercise.exercise as any,
             target_sets: exercise.targetSets,
-            last_used_values: exercise.lastUsedValues,
+            last_used_values: exercise.lastUsedValues as any,
             order_index: exerciseIndex
           });
 

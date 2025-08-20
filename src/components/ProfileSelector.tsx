@@ -45,7 +45,8 @@ export const ProfileSelector = ({ isOpen, onClose }: ProfileSelectorProps) => {
       return;
     }
 
-    createProfile(newProfileName.trim(), selectedAvatar);
+    // Profile creation is handled automatically via Supabase auth
+    console.log('Profile creation not needed in database mode');
     setNewProfileName('');
     setSelectedAvatar(defaultAvatars[0]);
     setShowCreateForm(false);
@@ -61,7 +62,8 @@ export const ProfileSelector = ({ isOpen, onClose }: ProfileSelectorProps) => {
   const handleSwitchProfile = (profileId: string) => {
     const profile = profiles.find(p => p.id === profileId);
     if (profile) {
-      switchProfile(profileId);
+      // Profile switching not needed in single-profile database mode
+      console.log('Profile switching not needed in database mode');
       toast({
         title: "Profile Switched",
         description: `Switched to ${profile.name}'s profile`
@@ -86,7 +88,8 @@ export const ProfileSelector = ({ isOpen, onClose }: ProfileSelectorProps) => {
   const handleDeleteConfirm = () => {
     if (profileToDelete) {
       const profile = profiles.find(p => p.id === profileToDelete);
-      deleteProfile(profileToDelete);
+      // Profile deletion not needed in database mode
+      console.log('Profile deletion not needed in database mode');
       toast({
         title: "Profile Deleted",
         description: `${profile?.name}'s profile has been deleted.`

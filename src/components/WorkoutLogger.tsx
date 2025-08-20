@@ -90,13 +90,15 @@ export const WorkoutLogger = ({}: WorkoutLoggerProps) => {
     });
   };
 
-  const handleSaveAsTemplate = () => {
+  const handleSaveAsTemplate = async () => {
     if (completedWorkout) {
-      const template = saveAsTemplate(completedWorkout);
-      toast({
-        title: "Template Saved!",
-        description: `"${template.name}" has been saved as a template.`
-      });
+      const template = await saveAsTemplate(completedWorkout);
+      if (template) {
+        toast({
+          title: "Template Saved!",
+          description: `"${template.name}" has been saved as a template.`
+        });
+      }
     }
   };
 
