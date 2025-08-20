@@ -6,8 +6,9 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (password: string, name: string, username: string) => Promise<{ error: any }>;
-  signIn: (username: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, name: string, username: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signInWithUsername: (username: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
 }
 
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signUp: async () => ({ error: null }),
   signIn: async () => ({ error: null }),
+  signInWithUsername: async () => ({ error: null }),
   signOut: async () => ({ error: null }),
 });
 
@@ -57,7 +59,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (password: string, name: string, username: string) => {
+  const signUp = async (email: string, password: string, name: string, username: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
     // First check if username is already taken
@@ -71,11 +73,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return { error: { message: 'Username is already taken' } };
     }
     
-    // Generate internal email based on username
-    const internalEmail = `${username}@user.local`;
-    
     const { data, error } = await supabase.auth.signUp({
-      email: internalEmail,
+      email,
       password,
       options: {
         emailRedirectTo: redirectUrl,
@@ -98,7 +97,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return { error };
   };
 
-  const signIn = async (username: string, password: string) => {
+  const signIn = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    return { error };
+  };
+
+  const signInWithUsername = async (username: string, password: string) => {
     // First, get the email associated with this username
     const { data: emailData, error: lookupError } = await supabase
       .rpc('get_email_by_username', { username_input: username });
@@ -127,6 +134,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     loading,
     signUp,
     signIn,
+    signInWithUsername,
     signOut,
   };
 

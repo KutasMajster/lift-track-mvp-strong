@@ -12,7 +12,7 @@ import { toast } from '@/hooks/use-toast';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { user, loading, signUp, signIn } = useAuth();
+  const { user, loading, signUp, signInWithUsername } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
@@ -21,6 +21,7 @@ const Auth = () => {
   const [signInPassword, setSignInPassword] = useState('');
   
   // Sign Up form  
+  const [signUpEmail, setSignUpEmail] = useState('');
   const [signUpPassword, setSignUpPassword] = useState('');
   const [signUpName, setSignUpName] = useState('');
   const [signUpUsername, setSignUpUsername] = useState('');
@@ -45,7 +46,7 @@ const Auth = () => {
     }
 
     setIsLoading(true);
-    const { error } = await signIn(signInUsername, signInPassword);
+    const { error } = await signInWithUsername(signInUsername, signInPassword);
     
     if (error) {
       toast({
@@ -64,7 +65,7 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!signUpPassword || !signUpName || !signUpUsername) {
+    if (!signUpEmail || !signUpPassword || !signUpName || !signUpUsername) {
       toast({
         title: "Missing Information",
         description: "Please fill in all fields.",
@@ -102,7 +103,7 @@ const Auth = () => {
     }
 
     setIsLoading(true);
-    const { error } = await signUp(signUpPassword, signUpName, signUpUsername);
+    const { error } = await signUp(signUpEmail, signUpPassword, signUpName, signUpUsername);
     
     if (error) {
       if (error.message?.includes('User already registered')) {
@@ -127,9 +128,10 @@ const Auth = () => {
     } else {
       toast({
         title: "Account Created!",
-        description: "You can now sign in with your username."
+        description: "Please check your email to verify your account."
       });
       // Clear form
+      setSignUpEmail('');
       setSignUpPassword('');
       setSignUpName('');
       setSignUpUsername('');
@@ -241,6 +243,17 @@ const Auth = () => {
                       required
                       pattern="[a-zA-Z0-9_]{3,20}"
                       title="Username must be 3-20 characters and contain only letters, numbers, and underscores"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={signUpEmail}
+                      onChange={(e) => setSignUpEmail(e.target.value)}
+                      required
                     />
                   </div>
                   <div className="space-y-2">
