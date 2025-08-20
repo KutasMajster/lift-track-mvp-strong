@@ -12,18 +12,19 @@ import { toast } from '@/hooks/use-toast';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { user, loading, signUp, signIn } = useAuth();
+  const { user, loading, signUp, signInWithUsername } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
   // Sign In form
-  const [signInEmail, setSignInEmail] = useState('');
+  const [signInUsername, setSignInUsername] = useState('');
   const [signInPassword, setSignInPassword] = useState('');
   
   // Sign Up form  
   const [signUpEmail, setSignUpEmail] = useState('');
   const [signUpPassword, setSignUpPassword] = useState('');
   const [signUpName, setSignUpName] = useState('');
+  const [signUpUsername, setSignUpUsername] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
   // Redirect if already authenticated
@@ -35,7 +36,7 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!signInEmail || !signInPassword) {
+    if (!signInUsername || !signInPassword) {
       toast({
         title: "Missing Information",
         description: "Please fill in all fields.",
@@ -45,12 +46,12 @@ const Auth = () => {
     }
 
     setIsLoading(true);
-    const { error } = await signIn(signInEmail, signInPassword);
+    const { error } = await signInWithUsername(signInUsername, signInPassword);
     
     if (error) {
       toast({
         title: "Sign In Failed",
-        description: error.message || "Invalid email or password.",
+        description: error.message || "Invalid username or password.",
         variant: "destructive"
       });
     } else {
@@ -64,7 +65,7 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!signUpEmail || !signUpPassword || !signUpName) {
+    if (!signUpEmail || !signUpPassword || !signUpName || !signUpUsername) {
       toast({
         title: "Missing Information",
         description: "Please fill in all fields.",
@@ -91,14 +92,30 @@ const Auth = () => {
       return;
     }
 
+    // Validate username format
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(signUpUsername)) {
+      toast({
+        title: "Invalid Username",
+        description: "Username must be 3-20 characters and contain only letters, numbers, and underscores.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsLoading(true);
-    const { error } = await signUp(signUpEmail, signUpPassword, signUpName);
+    const { error } = await signUp(signUpEmail, signUpPassword, signUpName, signUpUsername);
     
     if (error) {
       if (error.message?.includes('User already registered')) {
         toast({
           title: "Account Exists",
           description: "An account with this email already exists. Please sign in instead.",
+          variant: "destructive"
+        });
+      } else if (error.message?.includes('Username is already taken')) {
+        toast({
+          title: "Username Taken",
+          description: "This username is already taken. Please choose another.",
           variant: "destructive"
         });
       } else {
@@ -117,6 +134,7 @@ const Auth = () => {
       setSignUpEmail('');
       setSignUpPassword('');
       setSignUpName('');
+      setSignUpUsername('');
       setConfirmPassword('');
     }
     setIsLoading(false);
@@ -155,13 +173,13 @@ const Auth = () => {
               <TabsContent value="signin" className="space-y-4">
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signin-email">Email</Label>
+                    <Label htmlFor="signin-username">Username</Label>
                     <Input
-                      id="signin-email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={signInEmail}
-                      onChange={(e) => setSignInEmail(e.target.value)}
+                      id="signin-username"
+                      type="text"
+                      placeholder="Enter your username"
+                      value={signInUsername}
+                      onChange={(e) => setSignInUsername(e.target.value)}
                       required
                     />
                   </div>
@@ -212,6 +230,19 @@ const Auth = () => {
                       value={signUpName}
                       onChange={(e) => setSignUpName(e.target.value)}
                       required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-username">Username</Label>
+                    <Input
+                      id="signup-username"
+                      type="text"
+                      placeholder="Choose a username (3-20 characters)"
+                      value={signUpUsername}
+                      onChange={(e) => setSignUpUsername(e.target.value)}
+                      required
+                      pattern="[a-zA-Z0-9_]{3,20}"
+                      title="Username must be 3-20 characters and contain only letters, numbers, and underscores"
                     />
                   </div>
                   <div className="space-y-2">

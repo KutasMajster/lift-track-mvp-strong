@@ -6,8 +6,9 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, name?: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, name: string, username: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signInWithUsername: (username: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
 }
 
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signUp: async () => ({ error: null }),
   signIn: async () => ({ error: null }),
+  signInWithUsername: async () => ({ error: null }),
   signOut: async () => ({ error: null }),
 });
 
@@ -57,17 +59,41 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, name?: string) => {
+  const signUp = async (email: string, password: string, name: string, username: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
+    // First check if username is already taken
+    const { data: existingUser } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('username', username)
+      .single();
+    
+    if (existingUser) {
+      return { error: { message: 'Username is already taken' } };
+    }
+    
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: name ? { name } : undefined
+        data: { name, username }
       }
     });
+    
+    // If signup successful, update the profile with username
+    if (!error && data.user) {
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ username })
+        .eq('id', data.user.id);
+      
+      if (profileError) {
+        return { error: profileError };
+      }
+    }
+    
     return { error };
   };
 
@@ -77,6 +103,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       password,
     });
     return { error };
+  };
+
+  const signInWithUsername = async (username: string, password: string) => {
+    // First, get the email associated with this username
+    const { data: emailData, error: lookupError } = await supabase
+      .rpc('get_email_by_username', { username_input: username });
+    
+    if (lookupError || !emailData) {
+      return { error: { message: 'Invalid username or password' } };
+    }
+    
+    // Then sign in with the email
+    const { error } = await supabase.auth.signInWithPassword({
+      email: emailData,
+      password,
+    });
+    
+    return { error: error || null };
   };
 
   const signOut = async () => {
@@ -90,6 +134,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     loading,
     signUp,
     signIn,
+    signInWithUsername,
     signOut,
   };
 
