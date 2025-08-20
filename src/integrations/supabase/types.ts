@@ -102,6 +102,7 @@ export type Database = {
           id: string
           name: string
           settings: Json | null
+          username: string | null
         }
         Insert: {
           avatar?: string | null
@@ -109,6 +110,7 @@ export type Database = {
           id: string
           name: string
           settings?: Json | null
+          username?: string | null
         }
         Update: {
           avatar?: string | null
@@ -116,6 +118,7 @@ export type Database = {
           id?: string
           name?: string
           settings?: Json | null
+          username?: string | null
         }
         Relationships: []
       }
@@ -307,7 +310,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_email_by_username: {
+        Args: { username_input: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
