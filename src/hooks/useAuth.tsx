@@ -61,11 +61,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const redirectUrl = `${window.location.origin}/`;
     
     // First check if username is already taken
-    const { data: existingUser } = await supabase
+    const { data: existingUser, error: checkError } = await supabase
       .from('profiles')
       .select('username')
       .eq('username', username)
-      .single();
+      .maybeSingle();
+    
+    if (checkError) {
+      return { error: checkError };
+    }
     
     if (existingUser) {
       return { error: { message: 'Username is already taken' } };
@@ -85,13 +89,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     
     // If signup successful, update the profile with username
     if (!error && data.user) {
+      // Wait a bit for the profile to be created by trigger
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ username })
+        .update({ username, name })
         .eq('id', data.user.id);
       
       if (profileError) {
-        return { error: profileError };
+        console.error('Profile update error:', profileError);
+        return { error: { message: 'Account created but username setup failed. Please contact support.' } };
       }
     }
     

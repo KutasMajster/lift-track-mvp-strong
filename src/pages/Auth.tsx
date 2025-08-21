@@ -126,14 +126,18 @@ const Auth = () => {
       }
     } else {
       toast({
-        title: "Account Created!",
-        description: "You can now sign in with your username."
+        title: "Account Created Successfully! ✅",
+        description: `Welcome ${signUpName}! You can now sign in with username: ${signUpUsername}`,
       });
-      // Clear form
+      // Clear form and switch to sign in tab
       setSignUpPassword('');
       setSignUpName('');
       setSignUpUsername('');
       setConfirmPassword('');
+      
+      // Switch to sign in tab after successful signup
+      const signInTab = document.querySelector('[value="signin"]') as HTMLElement;
+      signInTab?.click();
     }
     setIsLoading(false);
   };
