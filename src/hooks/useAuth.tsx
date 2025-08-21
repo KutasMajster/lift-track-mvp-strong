@@ -75,8 +75,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return { error: { message: 'Username is already taken' } };
     }
     
-    // Generate internal email based on username
-    const internalEmail = `${username}@user.local`;
+    // Generate internal email based on username using valid domain
+    const internalEmail = `${username}+ig@example.com`;
     
     const { data, error } = await supabase.auth.signUp({
       email: internalEmail,

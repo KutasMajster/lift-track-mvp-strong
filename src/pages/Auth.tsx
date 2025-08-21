@@ -107,8 +107,8 @@ const Auth = () => {
     if (error) {
       if (error.message?.includes('User already registered')) {
         toast({
-          title: "Account Exists",
-          description: "An account with this email already exists. Please sign in instead.",
+          title: "Username Taken",
+          description: "This username is already taken. Please choose another.",
           variant: "destructive"
         });
       } else if (error.message?.includes('Username is already taken')) {
