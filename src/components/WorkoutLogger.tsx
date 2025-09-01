@@ -70,16 +70,21 @@ export const WorkoutLogger = ({}: WorkoutLoggerProps) => {
     });
   };
 
-  const handleCompleteWorkout = () => {
-    const completed = completeWorkout();
-    if (completed) {
-      setCompletedWorkout(completed);
-      setShowCompletionModal(true);
+  const handleCompleteWorkout = async () => {
+    try {
+      const completed = await completeWorkout();
+      if (completed) {
+        setCompletedWorkout(completed);
+        setShowCompletionModal(true);
+      }
+    } catch (error) {
+      console.error('Error completing workout:', error);
+      toast({
+        title: "Error Completing Workout",
+        description: "Could not complete workout. Please try again.",
+        variant: "destructive"
+      });
     }
-    toast({
-      title: "Workout Completed!",
-      description: "Great job! Your workout has been saved."
-    });
   };
 
   const handleCancelWorkout = () => {

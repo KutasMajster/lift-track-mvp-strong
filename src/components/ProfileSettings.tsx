@@ -20,19 +20,12 @@ export const ProfileSettings = () => {
   const { signOut } = useAuth();
   const { setTheme } = useTheme();
 
-  if (loading) {
+  if (loading || !activeProfile) {
     return (
       <div className="flex items-center justify-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (!activeProfile) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground mb-4">No active profile found</p>
-        <p className="text-sm text-muted-foreground">Please try refreshing the page or contact support if this issue persists.</p>
+        {loading && <p className="ml-2 text-muted-foreground">Loading profile...</p>}
+        {!loading && !activeProfile && <p className="ml-2 text-muted-foreground">Setting up profile...</p>}
       </div>
     );
   }
