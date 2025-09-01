@@ -8,7 +8,7 @@ import { useUnitConversion } from '@/hooks/useUnitConversion';
 import { Workout } from '@/types/exercise';
 
 interface WorkoutCompletionModalProps {
-  workout: Workout;
+  workout: Workout | null;
   isOpen: boolean;
   onClose: () => void;
   onSaveAsTemplate: () => void;
@@ -25,6 +25,8 @@ export const WorkoutCompletionModal = ({
   onViewHistory 
 }: WorkoutCompletionModalProps) => {
   const { convertWeight, getWeightUnit } = useUnitConversion();
+
+  if (!workout) return null;
   
   const formatDuration = (duration: number) => {
     const minutes = Math.round(duration / 60000);

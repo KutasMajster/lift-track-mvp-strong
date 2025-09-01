@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfiles } from '@/hooks/useProfiles';
@@ -20,12 +19,43 @@ export const ProfileSettings = () => {
   const { signOut } = useAuth();
   const { setTheme } = useTheme();
 
-  if (loading || !activeProfile) {
+  const handleLogout = async () => {
+    try {
+      const { error } = await signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out."
+      });
+      navigate('/auth');
+    } catch (error) {
+      console.error('Error logging out:', error);
+      toast({
+        title: "Logout Error",
+        description: "Could not log out. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  if (loading) {
     return (
-      <div className="flex items-center justify-center py-8">
+      <div className="flex flex-col items-center justify-center py-8 space-y-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        {loading && <p className="ml-2 text-muted-foreground">Loading profile...</p>}
-        {!loading && !activeProfile && <p className="ml-2 text-muted-foreground">Setting up profile...</p>}
+        <p className="text-muted-foreground">Loading profile...</p>
+      </div>
+    );
+  }
+
+  if (!activeProfile) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 space-y-4">
+        <p className="text-muted-foreground text-center">No active profile found</p>
+        <p className="text-sm text-muted-foreground text-center">Please refresh the page or sign in again</p>
+        <Button onClick={handleLogout} variant="outline">
+          Sign Out
+        </Button>
       </div>
     );
   }
@@ -65,26 +95,6 @@ export const ProfileSettings = () => {
       toast({
         title: "Default Rest Time Updated",
         description: `Default rest time changed to ${numValue} seconds`
-      });
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      const { error } = await signOut();
-      if (error) throw error;
-      
-      toast({
-        title: "Logged Out",
-        description: "You have been successfully logged out."
-      });
-      navigate('/auth');
-    } catch (error) {
-      console.error('Error logging out:', error);
-      toast({
-        title: "Logout Error",
-        description: "Could not log out. Please try again.",
-        variant: "destructive"
       });
     }
   };
