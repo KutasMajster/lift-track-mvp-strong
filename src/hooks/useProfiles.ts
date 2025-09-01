@@ -1,7 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { v4 as uuidv4 } from 'uuid';
 import { toast } from '@/hooks/use-toast';
 
 export interface UserProfile {
@@ -54,7 +54,7 @@ export const useProfiles = () => {
       const userProfile: UserProfile = {
         id: data.id,
         name: data.name,
-        avatar: data.avatar || 'default',
+        avatar: data.avatar || '💪',
         createdAt: new Date(data.created_at),
         settings: {
           theme: settings?.theme || 'system',
@@ -88,7 +88,7 @@ export const useProfiles = () => {
         .insert({
           id: user.id,
           name: user.user_metadata?.name || 'User',
-          avatar: 'default'
+          avatar: '💪'
         })
         .select()
         .single();
@@ -99,7 +99,7 @@ export const useProfiles = () => {
       const userProfile: UserProfile = {
         id: data.id,
         name: data.name,
-        avatar: data.avatar || 'default',
+        avatar: data.avatar || '💪',
         createdAt: new Date(data.created_at),
         settings: {
           theme: settings?.theme || 'system',
@@ -172,13 +172,45 @@ export const useProfiles = () => {
     }
   };
 
-  // Legacy functions for compatibility (no longer needed in database mode)
-  const createProfile = () => {
-    console.warn('createProfile is deprecated in database mode');
+  const updateProfile = async (profileId: string, updates: Partial<UserProfile>) => {
+    if (!activeProfile || !user) return;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          name: updates.name,
+          avatar: updates.avatar
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      const updatedProfile = {
+        ...activeProfile,
+        ...updates
+      };
+      
+      setActiveProfile(updatedProfile);
+      setProfiles([updatedProfile]);
+
+      toast({
+        title: "Profile Updated",
+        description: "Your profile has been updated successfully."
+      });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast({
+        title: "Error Updating Profile", 
+        description: "Could not update your profile. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const updateProfile = () => {
-    console.warn('updateProfile is deprecated in database mode');
+  // Legacy functions for compatibility
+  const createProfile = () => {
+    console.warn('createProfile is deprecated in database mode');
   };
 
   const deleteProfile = () => {

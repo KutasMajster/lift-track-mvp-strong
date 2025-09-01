@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useProfiles } from '@/hooks/useProfiles';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -6,9 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Plus, User, Edit, Trash2, Check } from 'lucide-react';
+import { Plus, User, Edit, Check } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { DeleteConfirmDialog } from '@/components/DeleteConfirmDialog';
 import { ProfileEditDialog } from '@/components/ProfileEditDialog';
 
 interface ProfileSelectorProps {
@@ -20,88 +20,22 @@ export const ProfileSelector = ({ isOpen, onClose }: ProfileSelectorProps) => {
   const { 
     profiles, 
     activeProfile, 
-    createProfile, 
-    switchProfile, 
-    deleteProfile,
     updateProfile,
     defaultAvatars 
   } = useProfiles();
   
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [newProfileName, setNewProfileName] = useState('');
-  const [selectedAvatar, setSelectedAvatar] = useState(defaultAvatars[0]);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [profileToDelete, setProfileToDelete] = useState<string | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [profileToEdit, setProfileToEdit] = useState<any>(null);
-
-  const handleCreateProfile = () => {
-    if (!newProfileName.trim()) {
-      toast({
-        title: "Name Required",
-        description: "Please enter a name for your profile.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Profile creation is handled automatically via Supabase auth
-    console.log('Profile creation not needed in database mode');
-    setNewProfileName('');
-    setSelectedAvatar(defaultAvatars[0]);
-    setShowCreateForm(false);
-    
-    toast({
-      title: "Profile Created!",
-      description: `Welcome, ${newProfileName}!`
-    });
-    
-    onClose();
-  };
-
-  const handleSwitchProfile = (profileId: string) => {
-    const profile = profiles.find(p => p.id === profileId);
-    if (profile) {
-      // Profile switching not needed in single-profile database mode
-      console.log('Profile switching not needed in database mode');
-      toast({
-        title: "Profile Switched",
-        description: `Switched to ${profile.name}'s profile`
-      });
-      onClose();
-    }
-  };
-
-  const handleDeleteClick = (profileId: string) => {
-    if (profiles.length <= 1) {
-      toast({
-        title: "Cannot Delete",
-        description: "You need at least one profile.",
-        variant: "destructive"
-      });
-      return;
-    }
-    setProfileToDelete(profileId);
-    setShowDeleteDialog(true);
-  };
-
-  const handleDeleteConfirm = () => {
-    if (profileToDelete) {
-      const profile = profiles.find(p => p.id === profileToDelete);
-      // Profile deletion not needed in database mode
-      console.log('Profile deletion not needed in database mode');
-      toast({
-        title: "Profile Deleted",
-        description: `${profile?.name}'s profile has been deleted.`
-      });
-      setShowDeleteDialog(false);
-      setProfileToDelete(null);
-    }
-  };
 
   const handleEditClick = (profile: any) => {
     setProfileToEdit(profile);
     setShowEditDialog(true);
+  };
+
+  const handleProfileSave = (profileId: string, updates: any) => {
+    updateProfile(profileId, updates);
+    setShowEditDialog(false);
+    setProfileToEdit(null);
   };
 
   return (
@@ -110,148 +44,52 @@ export const ProfileSelector = ({ isOpen, onClose }: ProfileSelectorProps) => {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            Select Profile
+            User Profile
           </DialogTitle>
         </DialogHeader>
         <div id="profile-selector-description" className="sr-only">
-          Choose or create a user profile to personalize your workout experience
+          View and edit your user profile information
         </div>
 
         <div className="space-y-4">
-          {/* Existing Profiles */}
-          <div className="grid grid-cols-2 gap-3">
-            {profiles.map(profile => (
-              <Card 
-                key={profile.id}
-                className={`cursor-pointer transition-all hover:scale-105 ${
-                  activeProfile?.id === profile.id 
-                    ? 'ring-2 ring-primary' 
-                    : 'hover:bg-accent'
-                }`}
-                onClick={() => handleSwitchProfile(profile.id)}
-              >
-                <CardContent className="p-4 text-center">
-                  <div className="flex items-center justify-between mb-2">
-                    <Avatar className="h-12 w-12 text-2xl mx-auto">
-                      <AvatarFallback>{profile.avatar}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditClick(profile);
-                        }}
-                        className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
-                      >
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                      {profiles.length > 1 && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteClick(profile.id);
-                          }}
-                          className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                  <p className="font-medium text-sm truncate">{profile.name}</p>
-                  {activeProfile?.id === profile.id && (
-                    <div className="flex items-center justify-center mt-1">
-                      <Check className="h-3 w-3 text-primary" />
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-
-            {/* Add New Profile Button */}
-            <Card 
-              className="cursor-pointer transition-all hover:scale-105 hover:bg-accent border-dashed"
-              onClick={() => setShowCreateForm(true)}
-            >
+          {/* Current Profile */}
+          {activeProfile && (
+            <Card className="ring-2 ring-primary">
               <CardContent className="p-4 text-center">
-                <div className="flex flex-col items-center gap-2">
-                  <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                    <Plus className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">Add Profile</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Create New Profile Form */}
-          {showCreateForm && (
-            <Card className="border-primary">
-              <CardContent className="p-4 space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="profile-name">Profile Name</Label>
-                  <Input
-                    id="profile-name"
-                    placeholder="Enter name..."
-                    value={newProfileName}
-                    onChange={(e) => setNewProfileName(e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Choose Avatar</Label>
-                  <div className="grid grid-cols-8 gap-2">
-                    {defaultAvatars.map(avatar => (
-                      <Button
-                        key={avatar}
-                        variant={selectedAvatar === avatar ? "default" : "outline"}
-                        size="sm"
-                        className="h-8 w-8 p-0 text-lg"
-                        onClick={() => setSelectedAvatar(avatar)}
-                      >
-                        {avatar}
-                      </Button>
-                    ))}
+                <div className="flex items-center justify-between mb-2">
+                  <Avatar className="h-12 w-12 text-2xl mx-auto">
+                    <AvatarFallback>{activeProfile.avatar}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEditClick(activeProfile)}
+                      className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
                   </div>
                 </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowCreateForm(false)}
-                    className="flex-1"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleCreateProfile}
-                    className="flex-1"
-                  >
-                    Create
-                  </Button>
+                <p className="font-medium text-sm truncate">{activeProfile.name}</p>
+                <div className="flex items-center justify-center mt-1">
+                  <Check className="h-3 w-3 text-primary" />
                 </div>
               </CardContent>
             </Card>
           )}
+
+          {/* No Profile Message */}
+          {!activeProfile && (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No active profile found</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Please refresh the app or contact support if this issue persists
+              </p>
+            </div>
+          )}
         </div>
       </DialogContent>
-
-      <DeleteConfirmDialog
-        isOpen={showDeleteDialog}
-        onClose={() => {
-          setShowDeleteDialog(false);
-          setProfileToDelete(null);
-        }}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Profile"
-        description="Are you sure you want to delete this profile? This action cannot be undone and all associated data will be lost."
-      />
 
       {profileToEdit && (
         <ProfileEditDialog
@@ -261,7 +99,7 @@ export const ProfileSelector = ({ isOpen, onClose }: ProfileSelectorProps) => {
             setProfileToEdit(null);
           }}
           profile={profileToEdit}
-          onSave={updateProfile}
+          onSave={handleProfileSave}
           defaultAvatars={defaultAvatars}
         />
       )}

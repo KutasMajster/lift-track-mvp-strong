@@ -1,7 +1,7 @@
+
 import { useState } from 'react';
 import { useProfiles } from '@/hooks/useProfiles';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -12,20 +12,29 @@ import { toast } from '@/hooks/use-toast';
 import { useTheme } from 'next-themes';
 
 export const ProfileSettings = () => {
-  const { activeProfile, updateSettings } = useProfiles();
+  const { activeProfile, updateSettings, loading } = useProfiles();
   const { setTheme } = useTheme();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   if (!activeProfile) {
     return (
       <div className="text-center py-8">
-        <p className="text-muted-foreground">No active profile selected</p>
+        <p className="text-muted-foreground mb-4">No active profile found</p>
+        <p className="text-sm text-muted-foreground">Please try refreshing the page or contact support if this issue persists.</p>
       </div>
     );
   }
 
   const handleThemeChange = (theme: 'light' | 'dark') => {
-    setTheme(theme); // Apply theme immediately first
-    updateSettings({ theme }); // Then update profile settings
+    setTheme(theme);
+    updateSettings({ theme });
     toast({
       title: "Theme Updated",
       description: `Theme changed to ${theme}`
