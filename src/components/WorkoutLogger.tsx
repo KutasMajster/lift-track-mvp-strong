@@ -4,7 +4,7 @@ import { useUnitConversion } from '@/hooks/useUnitConversion';
 import { useRestTimer } from '@/hooks/useRestTimer';
 import { useProfiles } from '@/hooks/useProfiles';
 import { ExerciseDatabase } from './ExerciseDatabase';
-import { WorkoutSummary } from './WorkoutSummary';
+import { WorkoutCompletionModal } from './WorkoutCompletionModal';
 import { ExerciseDetail } from './ExerciseDetail';
 import { RestTimer } from './RestTimer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -55,7 +55,7 @@ export const WorkoutLogger = ({}: WorkoutLoggerProps) => {
   } = useRestTimer();
 
   const [workoutName, setWorkoutName] = useState('');
-  const [showSummary, setShowSummary] = useState(false);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completedWorkout, setCompletedWorkout] = useState(null);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [showExerciseDetail, setShowExerciseDetail] = useState(false);
@@ -74,7 +74,7 @@ export const WorkoutLogger = ({}: WorkoutLoggerProps) => {
     const completed = completeWorkout();
     if (completed) {
       setCompletedWorkout(completed);
-      setShowSummary(true);
+      setShowCompletionModal(true);
     }
     toast({
       title: "Workout Completed!",
@@ -103,34 +103,20 @@ export const WorkoutLogger = ({}: WorkoutLoggerProps) => {
   };
 
   const handleStartNewWorkout = () => {
-    setShowSummary(false);
+    setShowCompletionModal(false);
     setCompletedWorkout(null);
   };
 
-  const handleCloseSummary = () => {
-    setShowSummary(false);
+  const handleCloseModal = () => {
+    setShowCompletionModal(false);
     setCompletedWorkout(null);
   };
 
   const handleViewHistory = () => {
     // Navigate to history tab by dispatching an event that the parent can listen to
     window.dispatchEvent(new CustomEvent('navigateToHistory'));
-    handleCloseSummary();
+    handleCloseModal();
   };
-
-  if (showSummary && completedWorkout) {
-    return (
-      <div className="space-y-6">
-        <WorkoutSummary 
-          workout={completedWorkout}
-          onSaveAsTemplate={handleSaveAsTemplate}
-          onStartNewWorkout={handleStartNewWorkout}
-          onClose={handleCloseSummary}
-          onViewHistory={handleViewHistory}
-        />
-      </div>
-    );
-  }
 
   if (!currentWorkout) {
     return (
@@ -395,6 +381,15 @@ export const WorkoutLogger = ({}: WorkoutLoggerProps) => {
           startTimer(seconds);
         }}
         onSkip={skipTimer}
+      />
+      
+      <WorkoutCompletionModal
+        workout={completedWorkout}
+        isOpen={showCompletionModal}
+        onClose={handleCloseModal}
+        onSaveAsTemplate={handleSaveAsTemplate}
+        onStartNewWorkout={handleStartNewWorkout}
+        onViewHistory={handleViewHistory}
       />
     </div>
   );

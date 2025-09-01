@@ -1,18 +1,23 @@
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useProfiles } from '@/hooks/useProfiles';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Settings, Palette, Scale, Timer } from 'lucide-react';
+import { Settings, Palette, Scale, Timer, LogOut } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useTheme } from 'next-themes';
 
 export const ProfileSettings = () => {
+  const navigate = useNavigate();
   const { activeProfile, updateSettings, loading } = useProfiles();
+  const { signOut } = useAuth();
   const { setTheme } = useTheme();
 
   if (loading) {
@@ -67,6 +72,26 @@ export const ProfileSettings = () => {
       toast({
         title: "Default Rest Time Updated",
         description: `Default rest time changed to ${numValue} seconds`
+      });
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out."
+      });
+      navigate('/auth');
+    } catch (error) {
+      console.error('Error logging out:', error);
+      toast({
+        title: "Logout Error",
+        description: "Could not log out. Please try again.",
+        variant: "destructive"
       });
     }
   };
@@ -238,6 +263,20 @@ export const ProfileSettings = () => {
             </div>
             <Switch checked={true} disabled />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Logout */}
+      <Card>
+        <CardContent className="pt-6">
+          <Button 
+            onClick={handleLogout} 
+            variant="destructive" 
+            className="w-full"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Log Out
+          </Button>
         </CardContent>
       </Card>
     </div>
