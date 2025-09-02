@@ -6,7 +6,7 @@ import { ExerciseLibrary } from '@/components/ExerciseLibrary';
 import { UserStats } from '@/components/UserStats';
 import { Templates } from '@/components/Templates';
 import { Measurements } from '@/components/Measurements';
-import { ProfileSettings } from '@/components/ProfileSettings';
+import { Settings } from '@/components/Settings';
 import { ProfileSelector } from '@/components/ProfileSelector';
 import { GlobalProfileButton } from '@/components/GlobalProfileButton';
 import { BottomNavigation } from '@/components/BottomNavigation';
@@ -80,8 +80,8 @@ const Index = () => {
         return <Measurements />;
       case 'library':
         return <ExerciseLibrary />;
-      case 'profile':
-        return <ProfileSettings />;
+      case 'settings':
+        return <Settings />;
       default:
         return <WorkoutLogger />;
     }

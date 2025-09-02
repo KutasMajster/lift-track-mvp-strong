@@ -1,4 +1,4 @@
-import { Home, History, Dumbbell, User, BookOpen, Ruler } from 'lucide-react';
+import { Home, History, Dumbbell, Settings, BookOpen, Ruler } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface BottomNavigationProps {
@@ -13,7 +13,7 @@ export const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationPro
     { id: 'history', label: 'History', icon: History },
     { id: 'measure', label: 'Measure', icon: Ruler },
     { id: 'library', label: 'Library', icon: BookOpen },
-    { id: 'profile', label: 'Profile', icon: User }
+    { id: 'settings', label: 'Settings', icon: Settings }
   ];
 
   return (
