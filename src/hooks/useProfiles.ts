@@ -30,8 +30,12 @@ export const useProfiles = () => {
 
   // Fetch user profile from Supabase
   const fetchProfile = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('fetchProfile: no user, returning');
+      return;
+    }
 
+    console.log('fetchProfile: fetching for user', user.id);
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -123,6 +127,7 @@ export const useProfiles = () => {
 
   // Load profile when user changes
   useEffect(() => {
+    console.log('useProfiles useEffect - user:', user?.id, 'loading:', loading);
     if (user) {
       fetchProfile();
     } else {

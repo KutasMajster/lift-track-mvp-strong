@@ -20,6 +20,9 @@ export const ProfileSettings = () => {
   const { setTheme } = useTheme();
   const [restTimeValue, setRestTimeValue] = useState('90');
 
+  // Debug logging to understand the issue
+  console.log('ProfileSettings render - loading:', loading, 'activeProfile:', activeProfile);
+
   const handleLogout = async () => {
     try {
       const { error } = await signOut();
