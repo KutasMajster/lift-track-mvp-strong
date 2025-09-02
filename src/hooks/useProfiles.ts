@@ -31,11 +31,9 @@ export const useProfiles = () => {
   // Fetch user profile from Supabase
   const fetchProfile = async () => {
     if (!user) {
-      console.log('fetchProfile: no user, returning');
       return;
     }
 
-    console.log('fetchProfile: fetching for user', user.id);
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -72,9 +70,25 @@ export const useProfiles = () => {
       setActiveProfile(userProfile);
     } catch (error) {
       console.error('Error fetching profile:', error);
+      // Create a fallback profile if fetch fails
+      const fallbackProfile: UserProfile = {
+        id: user.id,
+        name: user.user_metadata?.name || 'User',
+        avatar: '💪',
+        createdAt: new Date(),
+        settings: {
+          theme: 'light',
+          weightUnit: 'kg',
+          measurementUnit: 'metric',
+          defaultRestTime: 90
+        }
+      };
+      setProfiles([fallbackProfile]);
+      setActiveProfile(fallbackProfile);
+      
       toast({
-        title: "Error Loading Profile",
-        description: "Could not load your profile. Please try again.",
+        title: "Using Fallback Profile",
+        description: "Could not load your profile from database. Using default settings.",
         variant: "destructive"
       });
     } finally {
@@ -117,18 +131,36 @@ export const useProfiles = () => {
       setActiveProfile(userProfile);
     } catch (error) {
       console.error('Error creating profile:', error);
+      // Create a fallback profile if creation fails
+      const fallbackProfile: UserProfile = {
+        id: user.id,
+        name: user.user_metadata?.name || 'User',
+        avatar: '💪',
+        createdAt: new Date(),
+        settings: {
+          theme: 'light',
+          weightUnit: 'kg',
+          measurementUnit: 'metric',
+          defaultRestTime: 90
+        }
+      };
+      setProfiles([fallbackProfile]);
+      setActiveProfile(fallbackProfile);
+      
       toast({
-        title: "Error Creating Profile",
-        description: "Could not create your profile. Please try again.",
+        title: "Using Fallback Profile",
+        description: "Could not create profile in database. Using default settings.",
         variant: "destructive"
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   // Load profile when user changes
   useEffect(() => {
-    console.log('useProfiles useEffect - user:', user?.id, 'loading:', loading);
     if (user) {
+      setLoading(true);
       fetchProfile();
     } else {
       setProfiles([]);
