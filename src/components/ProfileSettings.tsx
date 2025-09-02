@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfiles } from '@/hooks/useProfiles';
 import { useAuth } from '@/hooks/useAuth';
@@ -18,6 +18,7 @@ export const ProfileSettings = () => {
   const { activeProfile, updateSettings, loading } = useProfiles();
   const { signOut } = useAuth();
   const { setTheme } = useTheme();
+  const [restTimeValue, setRestTimeValue] = useState('90');
 
   const handleLogout = async () => {
     try {
@@ -85,7 +86,12 @@ export const ProfileSettings = () => {
     });
   };
 
-  const [restTimeValue, setRestTimeValue] = useState(activeProfile?.settings.defaultRestTime.toString() || '90');
+  // Update rest time value when activeProfile changes
+  useEffect(() => {
+    if (activeProfile?.settings?.defaultRestTime) {
+      setRestTimeValue(activeProfile.settings.defaultRestTime.toString());
+    }
+  }, [activeProfile]);
 
   const handleRestTimeChange = (value: string) => {
     setRestTimeValue(value);

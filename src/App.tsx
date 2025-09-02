@@ -16,7 +16,7 @@ const App = () => (
     <ThemeProvider
       attribute="class"
       defaultTheme="light"
-      enableSystem
+      enableSystem={false}
       disableTransitionOnChange
     >
       <AuthProvider>
