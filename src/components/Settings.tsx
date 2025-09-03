@@ -47,19 +47,17 @@ export const Settings = () => {
     );
   }
 
-  if (!activeProfile) {
+  if (!activeProfile || !activeProfile.settings) {
     return (
       <div className="flex flex-col items-center justify-center py-8 space-y-4">
-        <p className="text-muted-foreground text-center">No active profile found</p>
-        <p className="text-sm text-muted-foreground text-center">Please refresh the page or sign in again</p>
-        <Button onClick={handleLogout} variant="outline">
-          Sign Out
-        </Button>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <p className="text-muted-foreground text-center">Loading profile settings...</p>
+        <p className="text-sm text-muted-foreground text-center">Please wait while we load your preferences</p>
       </div>
     );
   }
 
-  const handleThemeChange = (theme: 'light' | 'dark') => {
+  const handleThemeChange = (theme: 'light' | 'dark' | 'system') => {
     setTheme(theme);
     updateSettings({ theme });
     toast({
@@ -88,8 +86,10 @@ export const Settings = () => {
   useEffect(() => {
     if (activeProfile?.settings?.defaultRestTime) {
       setRestTimeValue(activeProfile.settings.defaultRestTime.toString());
+    } else {
+      setRestTimeValue('90');
     }
-  }, [activeProfile]);
+  }, [activeProfile?.settings?.defaultRestTime]);
 
   const handleRestTimeChange = (value: string) => {
     setRestTimeValue(value);
@@ -124,7 +124,7 @@ export const Settings = () => {
         <CardContent>
           <div className="flex items-center gap-4">
             <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-4xl">
-              {activeProfile.avatar}
+              {activeProfile.avatar && activeProfile.avatar !== 'default' ? activeProfile.avatar : '💪'}
             </div>
             <div>
               <h3 className="font-semibold text-lg">{activeProfile.name}</h3>
@@ -157,10 +157,11 @@ export const Settings = () => {
               <SelectContent>
                 <SelectItem value="light">Light</SelectItem>
                 <SelectItem value="dark">Dark</SelectItem>
+                <SelectItem value="system">System</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Choose your preferred color theme
+              Choose your preferred color theme (System follows your device settings)
             </p>
           </div>
         </CardContent>

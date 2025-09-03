@@ -39,15 +39,15 @@ export const useProfiles = () => {
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
+        throw error;
+      }
+
+      if (!data) {
         // If no profile exists, create one
-        if (error.code === 'PGRST116') {
-          await createInitialProfile();
-        } else {
-          throw error;
-        }
+        await createInitialProfile();
         return;
       }
 
@@ -56,7 +56,7 @@ export const useProfiles = () => {
       const userProfile: UserProfile = {
         id: data.id,
         name: data.name,
-        avatar: data.avatar || '💪',
+        avatar: data.avatar === 'default' ? '💪' : (data.avatar || '💪'),
         createdAt: new Date(data.created_at),
         settings: {
           theme: settings?.theme || 'system',
@@ -109,15 +109,19 @@ export const useProfiles = () => {
           avatar: '💪'
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+
+      if (!data) {
+        throw new Error('Failed to create profile');
+      }
 
       const settings = data.settings as any;
       const userProfile: UserProfile = {
         id: data.id,
         name: data.name,
-        avatar: data.avatar || '💪',
+        avatar: data.avatar === 'default' ? '💪' : (data.avatar || '💪'),
         createdAt: new Date(data.created_at),
         settings: {
           theme: settings?.theme || 'system',
