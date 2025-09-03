@@ -148,7 +148,7 @@ export const Settings = () => {
           <div className="space-y-2">
             <Label>Theme</Label>
             <Select
-              value={activeProfile.settings.theme}
+              value={activeProfile.settings?.theme || 'light'}
               onValueChange={handleThemeChange}
             >
               <SelectTrigger>
@@ -178,7 +178,7 @@ export const Settings = () => {
           <div className="space-y-2">
             <Label>Weight Unit</Label>
             <Select
-              value={activeProfile.settings.weightUnit}
+              value={activeProfile.settings?.weightUnit || 'lbs'}
               onValueChange={handleWeightUnitChange}
             >
               <SelectTrigger>
@@ -194,7 +194,7 @@ export const Settings = () => {
           <div className="space-y-2">
             <Label>Measurement System</Label>
             <Select
-              value={activeProfile.settings.measurementUnit}
+              value={activeProfile.settings?.measurementUnit || 'imperial'}
               onValueChange={handleMeasurementUnitChange}
             >
               <SelectTrigger>
