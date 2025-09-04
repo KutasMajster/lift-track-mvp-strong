@@ -52,17 +52,17 @@ export const useProfiles = () => {
       }
 
       // Convert Supabase profile to UserProfile format
-      const settings = data.settings as any;
+      const settings = data.settings as any || {};
       const userProfile: UserProfile = {
         id: data.id,
-        name: data.name,
+        name: data.name || 'User',
         avatar: data.avatar === 'default' ? '💪' : (data.avatar || '💪'),
-        createdAt: new Date(data.created_at),
+        createdAt: new Date(data.created_at || new Date()),
         settings: {
-          theme: settings?.theme || 'system',
-          weightUnit: settings?.weightUnit || 'kg',
-          measurementUnit: settings?.measurementUnit || 'metric',
-          defaultRestTime: settings?.defaultRestTime || 90
+          theme: settings.theme || 'system',
+          weightUnit: settings.weightUnit || 'kg',
+          measurementUnit: settings.measurementUnit || 'metric',
+          defaultRestTime: settings.defaultRestTime || 90
         }
       };
 
@@ -77,7 +77,7 @@ export const useProfiles = () => {
         avatar: '💪',
         createdAt: new Date(),
         settings: {
-          theme: 'light',
+          theme: 'system',
           weightUnit: 'kg',
           measurementUnit: 'metric',
           defaultRestTime: 90
@@ -85,12 +85,6 @@ export const useProfiles = () => {
       };
       setProfiles([fallbackProfile]);
       setActiveProfile(fallbackProfile);
-      
-      toast({
-        title: "Using Fallback Profile",
-        description: "Could not load your profile from database. Using default settings.",
-        variant: "destructive"
-      });
     } finally {
       setLoading(false);
     }
@@ -117,17 +111,17 @@ export const useProfiles = () => {
         throw new Error('Failed to create profile');
       }
 
-      const settings = data.settings as any;
+      const settings = data.settings as any || {};
       const userProfile: UserProfile = {
         id: data.id,
-        name: data.name,
+        name: data.name || 'User',
         avatar: data.avatar === 'default' ? '💪' : (data.avatar || '💪'),
-        createdAt: new Date(data.created_at),
+        createdAt: new Date(data.created_at || new Date()),
         settings: {
-          theme: settings?.theme || 'system',
-          weightUnit: settings?.weightUnit || 'kg',
-          measurementUnit: settings?.measurementUnit || 'metric',
-          defaultRestTime: settings?.defaultRestTime || 90
+          theme: settings.theme || 'system',
+          weightUnit: settings.weightUnit || 'kg',
+          measurementUnit: settings.measurementUnit || 'metric',
+          defaultRestTime: settings.defaultRestTime || 90
         }
       };
 
@@ -142,7 +136,7 @@ export const useProfiles = () => {
         avatar: '💪',
         createdAt: new Date(),
         settings: {
-          theme: 'light',
+          theme: 'system',
           weightUnit: 'kg',
           measurementUnit: 'metric',
           defaultRestTime: 90
@@ -150,12 +144,6 @@ export const useProfiles = () => {
       };
       setProfiles([fallbackProfile]);
       setActiveProfile(fallbackProfile);
-      
-      toast({
-        title: "Using Fallback Profile",
-        description: "Could not create profile in database. Using default settings.",
-        variant: "destructive"
-      });
     } finally {
       setLoading(false);
     }

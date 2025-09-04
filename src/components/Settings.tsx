@@ -38,24 +38,24 @@ export const Settings = () => {
     }
   };
 
-  if (loading) {
+  if (loading || !activeProfile) {
     return (
       <div className="flex flex-col items-center justify-center py-8 space-y-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <p className="text-muted-foreground">Loading settings...</p>
+        <p className="text-muted-foreground">
+          {loading ? 'Loading settings...' : 'Loading profile...'}
+        </p>
       </div>
     );
   }
 
-  if (!activeProfile || !activeProfile.settings) {
-    return (
-      <div className="flex flex-col items-center justify-center py-8 space-y-4">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <p className="text-muted-foreground text-center">Loading profile settings...</p>
-        <p className="text-sm text-muted-foreground text-center">Please wait while we load your preferences</p>
-      </div>
-    );
-  }
+  // Ensure settings exist with defaults
+  const settings = activeProfile.settings || {
+    theme: 'system',
+    weightUnit: 'kg',
+    measurementUnit: 'metric',
+    defaultRestTime: 90
+  };
 
   const handleThemeChange = (theme: 'light' | 'dark' | 'system') => {
     setTheme(theme);
@@ -84,12 +84,12 @@ export const Settings = () => {
 
   // Update rest time value when activeProfile changes
   useEffect(() => {
-    if (activeProfile?.settings?.defaultRestTime) {
-      setRestTimeValue(activeProfile.settings.defaultRestTime.toString());
+    if (settings?.defaultRestTime) {
+      setRestTimeValue(settings.defaultRestTime.toString());
     } else {
       setRestTimeValue('90');
     }
-  }, [activeProfile?.settings?.defaultRestTime]);
+  }, [settings?.defaultRestTime]);
 
   const handleRestTimeChange = (value: string) => {
     setRestTimeValue(value);
@@ -148,7 +148,7 @@ export const Settings = () => {
           <div className="space-y-2">
             <Label>Theme</Label>
             <Select
-              value={activeProfile.settings?.theme || 'light'}
+              value={settings?.theme || 'system'}
               onValueChange={handleThemeChange}
             >
               <SelectTrigger>
@@ -179,7 +179,7 @@ export const Settings = () => {
           <div className="space-y-2">
             <Label>Weight Unit</Label>
             <Select
-              value={activeProfile.settings?.weightUnit || 'lbs'}
+              value={settings?.weightUnit || 'kg'}
               onValueChange={handleWeightUnitChange}
             >
               <SelectTrigger>
@@ -195,7 +195,7 @@ export const Settings = () => {
           <div className="space-y-2">
             <Label>Measurement System</Label>
             <Select
-              value={activeProfile.settings?.measurementUnit || 'imperial'}
+              value={settings?.measurementUnit || 'metric'}
               onValueChange={handleMeasurementUnitChange}
             >
               <SelectTrigger>
