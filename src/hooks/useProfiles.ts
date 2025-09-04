@@ -161,6 +161,46 @@ export const useProfiles = () => {
     }
   }, [user?.id]);
 
+  const updateSettings = async (settings: Partial<UserProfile['settings']>) => {
+    if (!activeProfile || !user) return;
+
+    try {
+      const updatedSettings = {
+        ...activeProfile.settings,
+        ...settings
+      };
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          settings: updatedSettings
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      const updatedProfile = {
+        ...activeProfile,
+        settings: updatedSettings
+      };
+      
+      setActiveProfile(updatedProfile);
+      setProfiles([updatedProfile]);
+
+      toast({
+        title: "Settings Updated",
+        description: "Your preferences have been saved."
+      });
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      toast({
+        title: "Error Updating Settings", 
+        description: "Could not save your preferences. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const updateProfile = async (profileId: string, updates: Partial<UserProfile>) => {
     if (!activeProfile || !user) return;
 
@@ -218,6 +258,7 @@ export const useProfiles = () => {
     updateProfile,
     deleteProfile,
     switchProfile,
+    updateSettings,
     defaultAvatars: DEFAULT_AVATARS
   };
 };
